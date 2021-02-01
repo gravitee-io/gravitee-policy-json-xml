@@ -40,75 +40,49 @@ import java.util.regex.Pattern;
  */
 public class JsonToXmlTransformationPolicy {
 
-  private static final String UTF8_CHARSET_NAME = "UTF-8";
-  private static final String APPLICATION_XML =
-    MediaType.APPLICATION_JSON + ";charset=" + UTF8_CHARSET_NAME;
+    private static final String UTF8_CHARSET_NAME = "UTF-8";
+    private static final String CONTENT_TYPE = MediaType.APPLICATION_JSON + ";charset=" + UTF8_CHARSET_NAME;
 
-  /**
-   * Json to xml transformation configuration
-   */
-  private final JsonToXmlTransformationPolicyConfiguration configuration;
+    /**
+     * Json to xml transformation configuration
+     */
+    private final JsonToXmlTransformationPolicyConfiguration configuration;
 
-  public JsonToXmlTransformationPolicy(
-    final JsonToXmlTransformationPolicyConfiguration configuration
-  ) {
-    this.configuration = configuration;
-  }
-
-  @OnResponseContent
-  public ReadWriteStream onResponseContent(Response response) {
-    if (
-      configuration.getScope() == null ||
-      configuration.getScope() == PolicyScope.RESPONSE
-    ) {
-      Charset charset = CharsetHelper.extractFromContentType(
-        response.headers().contentType()
-      );
-
-      return TransformableResponseStreamBuilder
-        .on(response)
-        .contentType(APPLICATION_XML)
-        .transform(map(charset))
-        .build();
+    public JsonToXmlTransformationPolicy(final JsonToXmlTransformationPolicyConfiguration configuration) {
+        this.configuration = configuration;
     }
-    return null;
-  }
 
-  @OnRequestContent
-  public ReadWriteStream onRequestContent(Request request) {
-    if (configuration.getScope() == PolicyScope.REQUEST) {
-      Charset charset = CharsetHelper.extractFromContentType(
-        request.headers().contentType()
-      );
+    @OnResponseContent
+    public ReadWriteStream onResponseContent(Response response) {
+        if (configuration.getScope() == null || configuration.getScope() == PolicyScope.RESPONSE) {
+            Charset charset = CharsetHelper.extractFromContentType(response.headers().contentType());
 
-      return TransformableRequestStreamBuilder
-        .on(request)
-        .contentType(APPLICATION_XML)
-        .transform(map(charset))
-        .build();
+            return TransformableResponseStreamBuilder.on(response).contentType(CONTENT_TYPE).transform(map(charset)).build();
+        }
+        return null;
     }
-    return null;
-  }
 
-  private Function<Buffer, Buffer> map(Charset charset) {
-    return input -> {
-      try {
-        String encodedPayload = new String(
-          input.toString(charset).getBytes(UTF8_CHARSET_NAME)
-        );
-        JSONObject jsonPayload = new JSONObject(encodedPayload);
-        JSONObject jsonPayloadWithRoot = new JSONObject();
-        jsonPayloadWithRoot.append(
-          this.configuration.getRootElement(),
-          jsonPayload
-        );
-        return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
-      } catch (Exception ex) {
-        throw new TransformationException(
-          "Unable to transform JSON into XML: " + ex.getMessage(),
-          ex
-        );
-      }
-    };
-  }
+    @OnRequestContent
+    public ReadWriteStream onRequestContent(Request request) {
+        if (configuration.getScope() == PolicyScope.REQUEST) {
+            Charset charset = CharsetHelper.extractFromContentType(request.headers().contentType());
+
+            return TransformableRequestStreamBuilder.on(request).contentType(CONTENT_TYPE).transform(map(charset)).build();
+        }
+        return null;
+    }
+
+    private Function<Buffer, Buffer> map(Charset charset) {
+        return input -> {
+            try {
+                String encodedPayload = new String(input.toString(charset).getBytes(UTF8_CHARSET_NAME));
+                JSONObject jsonPayload = new JSONObject(encodedPayload);
+                JSONObject jsonPayloadWithRoot = new JSONObject();
+                jsonPayloadWithRoot.append(this.configuration.getRootElement(), jsonPayload);
+                return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
+            } catch (Exception ex) {
+                throw new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex);
+            }
+        };
+    }
 }

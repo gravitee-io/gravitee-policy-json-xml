@@ -20,6 +20,6 @@ package io.gravitee.policy.json2xml.configuration;
  * @author GraviteeSource Team
  */
 public enum PolicyScope {
-  REQUEST,
-  RESPONSE,
+    REQUEST,
+    RESPONSE,
 }

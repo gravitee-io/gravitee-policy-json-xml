@@ -17,28 +17,27 @@ package io.gravitee.policy.json2xml.configuration;
 
 import io.gravitee.policy.api.PolicyConfiguration;
 
-public class JsonToXmlTransformationPolicyConfiguration
-  implements PolicyConfiguration {
+public class JsonToXmlTransformationPolicyConfiguration implements PolicyConfiguration {
 
-  public static final String DEFAULT_ROOT = "root";
+    public static final String DEFAULT_ROOT = "root";
 
-  private PolicyScope scope = PolicyScope.RESPONSE;
+    private PolicyScope scope = PolicyScope.RESPONSE;
 
-  private String rootElement = DEFAULT_ROOT;
+    private String rootElement = DEFAULT_ROOT;
 
-  public PolicyScope getScope() {
-    return scope;
-  }
+    public PolicyScope getScope() {
+        return scope;
+    }
 
-  public void setScope(PolicyScope scope) {
-    this.scope = scope;
-  }
+    public void setScope(PolicyScope scope) {
+        this.scope = scope;
+    }
 
-  public void setRootElement(String rootElement) {
-    this.rootElement = rootElement;
-  }
+    public void setRootElement(String rootElement) {
+        this.rootElement = rootElement;
+    }
 
-  public String getRootElement() {
-    return rootElement;
-  }
+    public String getRootElement() {
+        return rootElement;
+    }
 }

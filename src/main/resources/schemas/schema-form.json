@@ -7,8 +7,7 @@
       "description": "Execute policy on <strong>request</strong> or <strong>response</strong> phase.",
       "type" : "string",
       "default": "REQUEST",
-      "enum" : [ "REQUEST", "RESPONSE" ],
-      "deprecated": "true"
+      "enum" : [ "REQUEST", "RESPONSE" ]
     },
     "rootElement" : {
       "title": "Root element",

@@ -20,7 +20,7 @@ endif::[]
 
 == Description
 
-You can use the `xml-json` policy to transform XML content to JSON content.
+You can use the `json-xml` policy to transform XML content to JSON content.
 
 == Configuration
 
@@ -46,8 +46,9 @@ You can configure the policy with the following options:
 
 [source, json]
 ----
-"xml-json": {
-    "scope": "RESPONSE"
+"json-xml": {
+    "scope": "RESPONSE",
+    "rootElement": "root"
 }
 ----
 

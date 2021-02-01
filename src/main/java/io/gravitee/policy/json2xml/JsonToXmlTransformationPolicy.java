@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 public class JsonToXmlTransformationPolicy {
 
     private static final String UTF8_CHARSET_NAME = "UTF-8";
-    private static final String CONTENT_TYPE = MediaType.APPLICATION_JSON + ";charset=" + UTF8_CHARSET_NAME;
+    private static final String CONTENT_TYPE = MediaType.APPLICATION_XML + ";charset=" + UTF8_CHARSET_NAME;
 
     /**
      * Json to xml transformation configuration

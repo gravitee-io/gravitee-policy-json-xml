@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-json-xml</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
     <description>Description of the JSON to XML Transformation  Gravitee Policy</description>
@@ -34,9 +34,9 @@
     </parent>
 
     <properties>
-        <gravitee-gateway-api.version>1.23.0</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.24.0</gravitee-gateway-api.version>
         <gravitee-policy-api.version>1.10.0</gravitee-policy-api.version>
-        <gravitee-common.version>1.19.0</gravitee-common.version>
+        <gravitee-common.version>1.20.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>
         <json-schema-generator-maven-plugin.outputDirectory>${project.build.directory}/schemas</json-schema-generator-maven-plugin.outputDirectory>
         <maven-assembly-plugin.version>2.5.5</maven-assembly-plugin.version>

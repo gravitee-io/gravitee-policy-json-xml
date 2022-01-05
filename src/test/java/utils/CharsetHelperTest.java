@@ -16,8 +16,6 @@
 package utils;
 
 import io.gravitee.common.http.MediaType;
-import io.gravitee.policy.json2xml.transformer.JSONObject;
-import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

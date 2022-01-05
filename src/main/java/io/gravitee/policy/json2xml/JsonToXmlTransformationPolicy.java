@@ -32,7 +32,6 @@ import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
 import java.nio.charset.Charset;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * @author Guillaume Cusnieux (guillaume.cusnieux at graviteesource.com)
@@ -55,7 +54,7 @@ public class JsonToXmlTransformationPolicy {
     @OnResponseContent
     public ReadWriteStream onResponseContent(Response response) {
         if (configuration.getScope() == null || configuration.getScope() == PolicyScope.RESPONSE) {
-            Charset charset = CharsetHelper.extractFromContentType(response.headers().contentType());
+            Charset charset = CharsetHelper.extractCharset(response.headers());
 
             return TransformableResponseStreamBuilder.on(response).contentType(CONTENT_TYPE).transform(map(charset)).build();
         }
@@ -65,7 +64,7 @@ public class JsonToXmlTransformationPolicy {
     @OnRequestContent
     public ReadWriteStream onRequestContent(Request request) {
         if (configuration.getScope() == PolicyScope.REQUEST) {
-            Charset charset = CharsetHelper.extractFromContentType(request.headers().contentType());
+            Charset charset = CharsetHelper.extractCharset(request.headers());
 
             return TransformableRequestStreamBuilder.on(request).contentType(CONTENT_TYPE).transform(map(charset)).build();
         }

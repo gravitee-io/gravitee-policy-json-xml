@@ -68,12 +68,7 @@ public class JsonToXmlTransformationPolicy {
         if (configuration.getScope() == PolicyScope.REQUEST) {
             Charset charset = CharsetHelper.extractFromContentType(request.headers().contentType());
 
-            return TransformableRequestStreamBuilder
-                    .on(request)
-                    .chain(chain)
-                    .contentType(CONTENT_TYPE)
-                    .transform(map(charset))
-                    .build();
+            return TransformableRequestStreamBuilder.on(request).chain(chain).contentType(CONTENT_TYPE).transform(map(charset)).build();
         }
         return null;
     }

@@ -23,6 +23,7 @@ import io.gravitee.gateway.api.http.stream.TransformableRequestStreamBuilder;
 import io.gravitee.gateway.api.http.stream.TransformableResponseStreamBuilder;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
+import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.api.annotations.OnRequestContent;
 import io.gravitee.policy.api.annotations.OnResponseContent;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
@@ -40,7 +41,7 @@ import java.util.function.Function;
 public class JsonToXmlTransformationPolicy {
 
     private static final String UTF8_CHARSET_NAME = "UTF-8";
-    private static final String CONTENT_TYPE = MediaType.APPLICATION_XML + ";charset=" + UTF8_CHARSET_NAME;
+    static final String CONTENT_TYPE = MediaType.APPLICATION_XML + ";charset=" + UTF8_CHARSET_NAME;
 
     /**
      * Json to xml transformation configuration
@@ -52,21 +53,21 @@ public class JsonToXmlTransformationPolicy {
     }
 
     @OnResponseContent
-    public ReadWriteStream onResponseContent(Response response) {
+    public ReadWriteStream onResponseContent(Response response, PolicyChain chain) {
         if (configuration.getScope() == null || configuration.getScope() == PolicyScope.RESPONSE) {
             Charset charset = CharsetHelper.extractCharset(response.headers());
 
-            return TransformableResponseStreamBuilder.on(response).contentType(CONTENT_TYPE).transform(map(charset)).build();
+            return TransformableResponseStreamBuilder.on(response).chain(chain).contentType(CONTENT_TYPE).transform(map(charset)).build();
         }
         return null;
     }
 
     @OnRequestContent
-    public ReadWriteStream onRequestContent(Request request) {
+    public ReadWriteStream onRequestContent(Request request, PolicyChain chain) {
         if (configuration.getScope() == PolicyScope.REQUEST) {
             Charset charset = CharsetHelper.extractCharset(request.headers());
 
-            return TransformableRequestStreamBuilder.on(request).contentType(CONTENT_TYPE).transform(map(charset)).build();
+            return TransformableRequestStreamBuilder.on(request).chain(chain).contentType(CONTENT_TYPE).transform(map(charset)).build();
         }
         return null;
     }

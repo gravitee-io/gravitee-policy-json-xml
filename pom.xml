@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -25,20 +25,20 @@
     <version>1.1.1</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
-    <description>Description of the JSON to XML Transformation  Gravitee Policy</description>
+    <description>Description of the JSON to XML Transformation Gravitee Policy</description>
 
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>17.2</version>
+        <version>20.2</version>
     </parent>
 
     <properties>
-        <gravitee-gateway-buffer.version>3.10.0</gravitee-gateway-buffer.version>
-        <gravitee-bom.version>1.4</gravitee-bom.version>
-        <gravitee-gateway-api.version>1.31.0</gravitee-gateway-api.version>
-        <gravitee-policy-api.version>1.10.0</gravitee-policy-api.version>
-        <gravitee-common.version>1.20.0</gravitee-common.version>
+        <gravitee-bom.version>2.1</gravitee-bom.version>
+        <gravitee-apim-gateway-buffer.version>3.18.0-SNAPSHOT</gravitee-apim-gateway-buffer.version>
+        <gravitee-gateway-api.version>1.33.0-prototype-reactive-SNAPSHOT</gravitee-gateway-api.version>
+        <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
+        <gravitee-common.version>1.26.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>
         <json-schema-generator-maven-plugin.outputDirectory>${project.build.directory}/schemas</json-schema-generator-maven-plugin.outputDirectory>
         <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
@@ -84,15 +84,29 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rx-java2</artifactId>
             <scope>provided</scope>
         </dependency>
 
         <!-- Test scope -->
         <dependency>
-            <groupId>io.gravitee.gateway</groupId>
-            <artifactId>gravitee-gateway-buffer</artifactId>
-            <version>${gravitee-gateway-buffer.version}</version>
+            <groupId>io.gravitee.apim.gateway</groupId>
+            <artifactId>gravitee-apim-gateway-buffer</artifactId>
+            <version>${gravitee-apim-gateway-buffer.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -197,14 +211,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>9</source>
-                    <target>9</target>
-                </configuration>
             </plugin>
         </plugins>
     </build>

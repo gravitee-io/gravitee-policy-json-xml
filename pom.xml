@@ -36,7 +36,7 @@
     <properties>
         <gravitee-bom.version>2.1</gravitee-bom.version>
         <gravitee-apim-gateway-buffer.version>3.18.0-SNAPSHOT</gravitee-apim-gateway-buffer.version>
-        <gravitee-gateway-api.version>1.33.0-prototype-reactive-debug-SNAPSHOT</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.35.0-jupiter-debug-SNAPSHOT</gravitee-gateway-api.version>
         <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
         <gravitee-common.version>1.26.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>

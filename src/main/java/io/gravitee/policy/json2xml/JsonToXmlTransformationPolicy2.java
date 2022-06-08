@@ -54,28 +54,36 @@ public class JsonToXmlTransformationPolicy2 implements Policy {
 
     @Override
     public Completable onRequest(final RequestExecutionContext ctx) {
-        return ctx.request().onBody(transformToXml(ctx));
+        return Completable.defer(
+            () -> {
+                Charset charset = CharsetHelper.extractCharset(ctx.request().headers());
+                ctx.request().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+                return ctx.request().onBody(transformToXml(charset));
+            }
+        );
     }
 
     @Override
     public Completable onResponse(final RequestExecutionContext ctx) {
-        return ctx.response().onBody(transformToXml(ctx));
+        return Completable.defer(
+            () -> {
+                Charset charset = CharsetHelper.extractCharset(ctx.response().headers());
+                ctx.response().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+                return ctx.response().onBody(transformToXml(charset));
+            }
+        );
     }
 
-    private MaybeTransformer<Buffer, Buffer> transformToXml(final RequestExecutionContext ctx) {
+    private MaybeTransformer<Buffer, Buffer> transformToXml(final Charset charset) {
         return bodyUpstream ->
             bodyUpstream.map(
                 buffer -> {
                     try {
-                        final Charset charset = CharsetHelper.extractCharset(ctx.request().headers());
-                        final String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
-                        final JSONObject jsonPayload = new JSONObject(encodedPayload);
-                        final JSONObject jsonPayloadWithRoot = new JSONObject();
+                        String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
+                        JSONObject jsonPayload = new JSONObject(encodedPayload);
+                        JSONObject jsonPayloadWithRoot = new JSONObject();
                         jsonPayloadWithRoot.append(configuration.getRootElement(), jsonPayload);
-                        final Buffer xmlBuffer = Buffer.buffer(XML.toString(jsonPayloadWithRoot));
-                        ctx.request().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-                        ctx.request().headers().set(HttpHeaderNames.CONTENT_LENGTH, "" + xmlBuffer.length());
-                        return xmlBuffer;
+                        return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
                     } catch (Exception ex) {
                         throw new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex);
                     }

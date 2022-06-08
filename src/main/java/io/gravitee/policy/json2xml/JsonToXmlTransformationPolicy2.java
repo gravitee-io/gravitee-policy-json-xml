@@ -19,8 +19,8 @@ import io.gravitee.common.http.MediaType;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
-import io.gravitee.gateway.reactive.api.context.RequestExecutionContext;
-import io.gravitee.gateway.reactive.api.policy.Policy;
+import io.gravitee.gateway.jupiter.api.context.RequestExecutionContext;
+import io.gravitee.gateway.jupiter.api.policy.Policy;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.gravitee.policy.json2xml.transformer.JSONObject;
 import io.gravitee.policy.json2xml.transformer.XML;
@@ -48,38 +48,40 @@ public class JsonToXmlTransformationPolicy2 implements Policy {
     }
 
     @Override
-    public String getId() {
+    public String id() {
         return "json-xml";
     }
 
     @Override
     public Completable onRequest(final RequestExecutionContext ctx) {
-        Charset charset = CharsetHelper.extractCharset(ctx.request().headers());
-        ctx.request().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-        return ctx.request().onBody(map(charset));
+        return Completable.defer(() -> {
+            Charset charset = CharsetHelper.extractCharset(ctx.request().headers());
+            ctx.request().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+            return ctx.request().onBody(map(charset));
+        });
     }
 
     @Override
     public Completable onResponse(final RequestExecutionContext ctx) {
-        Charset charset = CharsetHelper.extractCharset(ctx.response().headers());
-        ctx.response().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-        return ctx.response().onBody(map(charset));
+        return Completable.defer(() -> {
+            Charset charset = CharsetHelper.extractCharset(ctx.response().headers());
+            ctx.response().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+            return ctx.response().onBody(map(charset));
+        });
     }
 
     private MaybeTransformer<Buffer, Buffer> map(final Charset charset) {
         return bodyUpstream ->
-            bodyUpstream.map(
-                buffer -> {
-                    try {
-                        String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
-                        JSONObject jsonPayload = new JSONObject(encodedPayload);
-                        JSONObject jsonPayloadWithRoot = new JSONObject();
-                        jsonPayloadWithRoot.append(configuration.getRootElement(), jsonPayload);
-                        return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
-                    } catch (Exception ex) {
-                        throw new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex);
-                    }
+            bodyUpstream.map(buffer -> {
+                try {
+                    String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
+                    JSONObject jsonPayload = new JSONObject(encodedPayload);
+                    JSONObject jsonPayloadWithRoot = new JSONObject();
+                    jsonPayloadWithRoot.append(configuration.getRootElement(), jsonPayload);
+                    return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
+                } catch (Exception ex) {
+                    throw new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex);
                 }
-            );
+            });
     }
 }

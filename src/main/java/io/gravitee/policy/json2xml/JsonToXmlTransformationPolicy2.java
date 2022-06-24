@@ -26,6 +26,7 @@ import io.gravitee.policy.json2xml.transformer.JSONObject;
 import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.MaybeTransformer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -54,22 +55,27 @@ public class JsonToXmlTransformationPolicy2 implements Policy {
 
     @Override
     public Completable onRequest(final RequestExecutionContext ctx) {
-        return Completable.defer(
+        return Completable.fromRunnable(
             () -> {
                 Charset charset = CharsetHelper.extractCharset(ctx.request().headers());
                 ctx.request().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-                return ctx.request().onBody(transformToXml(charset));
+                ctx
+                    .request()
+                    .chunks(
+                        Flowable
+                            .fromCallable(() -> Buffer.buffer("<root><fake2/></root>"))
+                            .doOnSubscribe(subscription -> System.out.println("sub on json to xml"))
+                    );
             }
         );
     }
 
     @Override
     public Completable onResponse(final RequestExecutionContext ctx) {
-        return Completable.defer(
+        return Completable.fromRunnable(
             () -> {
                 Charset charset = CharsetHelper.extractCharset(ctx.response().headers());
                 ctx.response().headers().set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-                return ctx.response().onBody(transformToXml(charset));
             }
         );
     }

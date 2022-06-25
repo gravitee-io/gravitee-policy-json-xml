@@ -36,7 +36,7 @@
     <properties>
         <gravitee-gateway-buffer.version>3.10.0</gravitee-gateway-buffer.version>
         <gravitee-bom.version>1.4</gravitee-bom.version>
-        <gravitee-gateway-api.version>1.31.0</gravitee-gateway-api.version>
+        <gravitee-gateway-api.version>1.35.0</gravitee-gateway-api.version>
         <gravitee-policy-api.version>1.10.0</gravitee-policy-api.version>
         <gravitee-common.version>1.20.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>

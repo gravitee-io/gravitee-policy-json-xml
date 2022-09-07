@@ -25,24 +25,30 @@
     <version>1.1.1</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
-    <description>Description of the JSON to XML Transformation  Gravitee Policy</description>
+    <description>Description of the JSON to XML Transformation Gravitee Policy</description>
 
     <parent>
         <groupId>io.gravitee</groupId>
         <artifactId>gravitee-parent</artifactId>
-        <version>17.2</version>
+        <version>20.4</version>
     </parent>
 
     <properties>
-        <gravitee-gateway-buffer.version>3.10.0</gravitee-gateway-buffer.version>
-        <gravitee-bom.version>1.4</gravitee-bom.version>
-        <gravitee-gateway-api.version>1.31.0</gravitee-gateway-api.version>
-        <gravitee-policy-api.version>1.10.0</gravitee-policy-api.version>
-        <gravitee-common.version>1.20.0</gravitee-common.version>
+        <gravitee-bom.version>2.6</gravitee-bom.version>
+        <gravitee-apim-gateway-buffer.version>3.20.0-SNAPSHOT</gravitee-apim-gateway-buffer.version>
+        <gravitee-gateway-api.version>1.46.1</gravitee-gateway-api.version>
+        <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
+        <gravitee-common.version>1.27.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>
         <json-schema-generator-maven-plugin.outputDirectory>${project.build.directory}/schemas</json-schema-generator-maven-plugin.outputDirectory>
         <maven-assembly-plugin.version>2.6</maven-assembly-plugin.version>
         <publish-folder-path>graviteeio-apim/plugins/policies</publish-folder-path>
+        <json.version>20220320</json.version>
+        <gravitee-apim-gateway-tests-sdk.version>3.20.0-SNAPSHOT</gravitee-apim-gateway-tests-sdk.version>
+        <gravitee-node-api.version>1.21.0</gravitee-node-api.version>
+        <gravitee-node.version>1.24.2</gravitee-node.version>
+        <gravitee-plugin.version>1.24.1</gravitee-plugin.version>
+        <gravitee-connector-api.version>1.1.0</gravitee-connector-api.version>
     </properties>
 
     <dependencyManagement>
@@ -54,6 +60,35 @@
                 <version>${gravitee-bom.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.plugin</groupId>
+                <artifactId>gravitee-plugin</artifactId>
+                <version>${gravitee-plugin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.common</groupId>
+                <artifactId>gravitee-common</artifactId>
+                <version>${gravitee-common.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.node</groupId>
+                <artifactId>gravitee-node</artifactId>
+                <version>${gravitee-node.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.gateway</groupId>
+                <artifactId>gravitee-gateway-api</artifactId>
+                <version>${gravitee-gateway-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gravitee.connector</groupId>
+                <artifactId>gravitee-connector-api</artifactId>
+                <version>${gravitee-connector-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -82,32 +117,33 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>provided</scope>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>${json.version}</version>
         </dependency>
 
         <!-- Test scope -->
         <dependency>
-            <groupId>io.gravitee.gateway</groupId>
-            <artifactId>gravitee-gateway-buffer</artifactId>
-            <version>${gravitee-gateway-buffer.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>io.gravitee.apim.gateway</groupId>
+            <artifactId>gravitee-apim-gateway-buffer</artifactId>
+            <version>${gravitee-apim-gateway-buffer.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -119,19 +155,17 @@
             <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20201115</version>
+            <groupId>io.gravitee.apim.gateway</groupId>
+            <artifactId>gravitee-apim-gateway-tests-sdk</artifactId>
+            <version>${gravitee-apim-gateway-tests-sdk.version}</version>
+            <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

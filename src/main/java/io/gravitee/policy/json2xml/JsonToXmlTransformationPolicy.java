@@ -15,74 +15,109 @@
  */
 package io.gravitee.policy.json2xml;
 
-import io.gravitee.common.http.MediaType;
-import io.gravitee.gateway.api.Request;
-import io.gravitee.gateway.api.Response;
+import io.gravitee.common.http.HttpStatusCode;
 import io.gravitee.gateway.api.buffer.Buffer;
-import io.gravitee.gateway.api.http.stream.TransformableRequestStreamBuilder;
-import io.gravitee.gateway.api.http.stream.TransformableResponseStreamBuilder;
-import io.gravitee.gateway.api.stream.ReadWriteStream;
+import io.gravitee.gateway.api.http.HttpHeaderNames;
+import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
-import io.gravitee.policy.api.PolicyChain;
-import io.gravitee.policy.api.annotations.OnRequestContent;
-import io.gravitee.policy.api.annotations.OnResponseContent;
+import io.gravitee.gateway.jupiter.api.ExecutionFailure;
+import io.gravitee.gateway.jupiter.api.context.HttpExecutionContext;
+import io.gravitee.gateway.jupiter.api.context.MessageExecutionContext;
+import io.gravitee.gateway.jupiter.api.policy.Policy;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
-import io.gravitee.policy.json2xml.configuration.PolicyScope;
 import io.gravitee.policy.json2xml.transformer.JSONObject;
 import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
+import io.gravitee.policy.v3.json2xml.JsonToXmlTransformationPolicyV3;
+import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import java.nio.charset.Charset;
-import java.util.function.Function;
+import java.nio.charset.StandardCharsets;
 
 /**
- * @author Guillaume Cusnieux (guillaume.cusnieux at graviteesource.com)
+ * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class JsonToXmlTransformationPolicy {
-
-    private static final String UTF8_CHARSET_NAME = "UTF-8";
-    static final String CONTENT_TYPE = MediaType.APPLICATION_XML + ";charset=" + UTF8_CHARSET_NAME;
-
-    /**
-     * Json to xml transformation configuration
-     */
-    private final JsonToXmlTransformationPolicyConfiguration configuration;
+public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicyV3 implements Policy {
 
     public JsonToXmlTransformationPolicy(final JsonToXmlTransformationPolicyConfiguration configuration) {
-        this.configuration = configuration;
+        super(configuration);
     }
 
-    @OnResponseContent
-    public ReadWriteStream onResponseContent(Response response, PolicyChain chain) {
-        if (configuration.getScope() == null || configuration.getScope() == PolicyScope.RESPONSE) {
-            Charset charset = CharsetHelper.extractCharset(response.headers());
+    @Override
+    public String id() {
+        return "json-xml";
+    }
 
-            return TransformableResponseStreamBuilder.on(response).chain(chain).contentType(CONTENT_TYPE).transform(map(charset)).build();
+    @Override
+    public Completable onRequest(final HttpExecutionContext ctx) {
+        return ctx
+            .request()
+            .onBody(
+                bodyUpstream ->
+                    bodyUpstream
+                        .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(ctx.request().headers())))
+                        .doOnSuccess(xmlBuffer -> applyHeaders(ctx.request().headers(), xmlBuffer))
+            )
+            .onErrorResumeNext(throwable -> interruptWithBadRequest(ctx, throwable));
+    }
+
+    @Override
+    public Completable onResponse(final HttpExecutionContext ctx) {
+        return ctx
+            .response()
+            .onBody(
+                bodyUpstream ->
+                    bodyUpstream
+                        .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(ctx.response().headers())))
+                        .doOnSuccess(xmlBuffer -> applyHeaders(ctx.response().headers(), xmlBuffer))
+            )
+            .onErrorResumeNext(throwable -> interruptWithBadRequest(ctx, throwable));
+    }
+
+    @Override
+    public Completable onMessageRequest(MessageExecutionContext ctx) {
+        return ctx
+            .request()
+            .onMessage(
+                message ->
+                    transformToXml(message.content(), CharsetHelper.extractCharset(ctx.request().headers()))
+                        .map(message::content)
+                        .doOnSuccess(xmlBuffer -> applyHeaders(message.headers(), message.content()))
+            );
+    }
+
+    @Override
+    public Completable onMessageResponse(MessageExecutionContext ctx) {
+        return ctx
+            .response()
+            .onMessage(
+                message ->
+                    transformToXml(message.content(), CharsetHelper.extractCharset(ctx.response().headers()))
+                        .map(message::content)
+                        .doOnSuccess(xmlBuffer -> applyHeaders(message.headers(), message.content()))
+            );
+    }
+
+    private Maybe<Buffer> transformToXml(Buffer buffer, final Charset charset) {
+        try {
+            String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
+            JSONObject jsonPayload = new JSONObject(encodedPayload);
+            JSONObject jsonPayloadWithRoot = new JSONObject();
+            jsonPayloadWithRoot.append(configuration.getRootElement(), jsonPayload);
+
+            return Maybe.just(Buffer.buffer(XML.toString(jsonPayloadWithRoot)));
+        } catch (Exception ex) {
+            return Maybe.error(new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex));
         }
-        return null;
     }
 
-    @OnRequestContent
-    public ReadWriteStream onRequestContent(Request request, PolicyChain chain) {
-        if (configuration.getScope() == PolicyScope.REQUEST) {
-            Charset charset = CharsetHelper.extractCharset(request.headers());
-
-            return TransformableRequestStreamBuilder.on(request).chain(chain).contentType(CONTENT_TYPE).transform(map(charset)).build();
-        }
-        return null;
+    private static void applyHeaders(HttpHeaders headers, Buffer xmlBuffer) {
+        headers.set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+        headers.set(HttpHeaderNames.CONTENT_LENGTH, Integer.toString(xmlBuffer.length()));
     }
 
-    private Function<Buffer, Buffer> map(Charset charset) {
-        return input -> {
-            try {
-                String encodedPayload = new String(input.toString(charset).getBytes(UTF8_CHARSET_NAME));
-                JSONObject jsonPayload = new JSONObject(encodedPayload);
-                JSONObject jsonPayloadWithRoot = new JSONObject();
-                jsonPayloadWithRoot.append(this.configuration.getRootElement(), jsonPayload);
-                return Buffer.buffer(XML.toString(jsonPayloadWithRoot));
-            } catch (Exception ex) {
-                throw new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex);
-            }
-        };
+    private static Completable interruptWithBadRequest(HttpExecutionContext ctx, Throwable throwable) {
+        return ctx.interruptWith(new ExecutionFailure(HttpStatusCode.BAD_REQUEST_400).message(throwable.getMessage()));
     }
 }

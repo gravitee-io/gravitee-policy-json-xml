@@ -8,13 +8,31 @@ image:https://circleci.com/gh/gravitee-io/gravitee-policy-json-xml.svg?style=svg
 image:https://f.hubspotusercontent40.net/hubfs/7600448/gravitee-github-button.jpg["Join the community forum", link="https://community.gravitee.io?utm_source=readme", height=20]
 endif::[]
 
-== Phase
+== Phases
+
+=== V3 engine
 
 [cols="2*", options="header"]
 |===
 ^|onRequestContent
 ^|onResponseContent
 
+^.^| X
+^.^| X
+
+|===
+
+=== Jupiter engine
+
+[cols="4*", options="header"]
+|===
+^|onRequest
+^|onResponse
+^|onMessageRequest
+^|onMessageResponse
+
+^.^| X
+^.^| X
 ^.^| X
 ^.^| X
 
@@ -31,7 +49,7 @@ You can configure the policy with the following options:
 |===
 |Property |Required |Description |Type |Default
 
-.^|scope
+.^|scope _(deprecated, v3 only)_
 ^.^|X
 |The execution scope (`request` or `response`).
 ^.^|string

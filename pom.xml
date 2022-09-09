@@ -35,7 +35,6 @@
 
     <properties>
         <gravitee-bom.version>2.6</gravitee-bom.version>
-        <gravitee-apim-gateway-buffer.version>3.20.0-SNAPSHOT</gravitee-apim-gateway-buffer.version>
         <gravitee-gateway-api.version>1.46.1</gravitee-gateway-api.version>
         <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
         <gravitee-common.version>1.27.0</gravitee-common.version>
@@ -126,12 +125,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.gravitee.apim.gateway</groupId>
-            <artifactId>gravitee-apim-gateway-buffer</artifactId>
-            <version>${gravitee-apim-gateway-buffer.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

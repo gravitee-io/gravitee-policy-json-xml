@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.1...1.2.0) (2022-09-09)
+
+
+### Features
+
+* message level policy ([06e98b3](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/06e98b3c75abefc85a4783530cfd9066fb566354)), closes [gravitee-io/issues#8403](https://github.com/gravitee-io/issues/issues/8403)
+
 ## [1.1.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.0...1.1.1) (2022-04-28)
 
 

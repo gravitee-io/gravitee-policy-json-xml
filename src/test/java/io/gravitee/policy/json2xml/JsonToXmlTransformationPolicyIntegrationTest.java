@@ -80,6 +80,24 @@ public class JsonToXmlTransformationPolicyIntegrationTest
     }
 
     @Test
+    @DisplayName("Should return Bad Request when posting invalid json to gateway")
+    @DeployApi("/apis/api-pre.json")
+    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(WebClient client) {
+        final String input = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
+
+        final TestObserver<HttpResponse<Buffer>> obs = client.post("/test").rxSendBuffer(Buffer.buffer(input)).test();
+
+        awaitTerminalEvent(obs)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(400);
+                    return true;
+                }
+            )
+            .assertNoErrors();
+    }
+
+    @Test
     @DisplayName("Should get xml from gateway")
     @DeployApi("/apis/api-post.json")
     void shouldGetXmlContentFromBackend(WebClient client) {
@@ -103,7 +121,29 @@ public class JsonToXmlTransformationPolicyIntegrationTest
         wiremock.verify(1, getRequestedFor(urlPathEqualTo("/team")));
     }
 
-    private String loadResource(String resource) {
+    @Test
+    @DisplayName("Should return Internal Error when getting invalid json from backend")
+    @DeployApi("/apis/api-post.json")
+    void shouldReturnInternalErrorWhenGettingInvalidXmlContentFromBackend(WebClient client) {
+        final String backendResponse = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
+        wiremock.stubFor(get("/team").willReturn(ok(backendResponse)));
+
+        final TestObserver<HttpResponse<Buffer>> obs = client.get("/test").rxSend().test();
+
+        awaitTerminalEvent(obs)
+            .assertComplete()
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    return true;
+                }
+            )
+            .assertNoErrors();
+
+        wiremock.verify(1, getRequestedFor(urlPathEqualTo("/team")));
+    }
+
+    protected String loadResource(String resource) {
         try (InputStream is = this.getClass().getResourceAsStream(resource)) {
             return new String(Objects.requireNonNull(is).readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {

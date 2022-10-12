@@ -23,6 +23,7 @@ import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.gateway.jupiter.api.ExecutionFailure;
 import io.gravitee.gateway.jupiter.api.context.HttpExecutionContext;
 import io.gravitee.gateway.jupiter.api.context.MessageExecutionContext;
+import io.gravitee.gateway.jupiter.api.message.Message;
 import io.gravitee.gateway.jupiter.api.policy.Policy;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.gravitee.policy.json2xml.transformer.JSONObject;
@@ -40,8 +41,16 @@ import java.nio.charset.StandardCharsets;
  */
 public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicyV3 implements Policy {
 
+    private static final String INVALID_PAYLOAD_FAILURE_KEY = "JSON_INVALID_PAYLOAD";
+    private static final String INVALID_MESSAGE_PAYLOAD_FAILURE_KEY = "JSON_INVALID_MESSAGE_PAYLOAD";
+
     public JsonToXmlTransformationPolicy(final JsonToXmlTransformationPolicyConfiguration configuration) {
         super(configuration);
+    }
+
+    private static void setContentHeaders(final HttpHeaders headers, final Buffer xmlBuffer) {
+        headers.set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
+        headers.set(HttpHeaderNames.CONTENT_LENGTH, Integer.toString(xmlBuffer.length()));
     }
 
     @Override
@@ -51,51 +60,63 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
 
     @Override
     public Completable onRequest(final HttpExecutionContext ctx) {
-        return ctx
-            .request()
-            .onBody(
-                bodyUpstream ->
-                    bodyUpstream
-                        .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(ctx.request().headers())))
-                        .doOnSuccess(xmlBuffer -> applyHeaders(ctx.request().headers(), xmlBuffer))
-            )
-            .onErrorResumeNext(throwable -> interruptWithBadRequest(ctx, throwable));
+        return ctx.request().onBody(body -> transformBodyToXml(ctx, body, ctx.request().headers(), HttpStatusCode.BAD_REQUEST_400));
     }
 
     @Override
     public Completable onResponse(final HttpExecutionContext ctx) {
         return ctx
             .response()
-            .onBody(
-                bodyUpstream ->
-                    bodyUpstream
-                        .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(ctx.response().headers())))
-                        .doOnSuccess(xmlBuffer -> applyHeaders(ctx.response().headers(), xmlBuffer))
-            )
-            .onErrorResumeNext(throwable -> interruptWithBadRequest(ctx, throwable));
+            .onBody(body -> transformBodyToXml(ctx, body, ctx.response().headers(), HttpStatusCode.INTERNAL_SERVER_ERROR_500));
+    }
+
+    private Maybe<Buffer> transformBodyToXml(
+        final HttpExecutionContext ctx,
+        final Maybe<Buffer> bodyUpstream,
+        final HttpHeaders httpHeaders,
+        final int failureHttpCode
+    ) {
+        return bodyUpstream
+            .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(httpHeaders)))
+            .doOnSuccess(xmlBuffer -> setContentHeaders(httpHeaders, xmlBuffer))
+            .onErrorResumeNext(
+                ctx.interruptBodyWith(
+                    new ExecutionFailure(failureHttpCode)
+                        .key(INVALID_PAYLOAD_FAILURE_KEY)
+                        .message("Unable to transform invalid JSON payload to XML")
+                )
+            );
     }
 
     @Override
     public Completable onMessageRequest(MessageExecutionContext ctx) {
         return ctx
             .request()
-            .onMessage(
-                message ->
-                    transformToXml(message.content(), CharsetHelper.extractCharset(ctx.request().headers()))
-                        .map(message::content)
-                        .doOnSuccess(xmlBuffer -> applyHeaders(message.headers(), message.content()))
-            );
+            .onMessage(message -> transformMessageToXml(ctx, message, ctx.request().headers(), HttpStatusCode.BAD_REQUEST_400));
     }
 
     @Override
     public Completable onMessageResponse(MessageExecutionContext ctx) {
         return ctx
             .response()
-            .onMessage(
-                message ->
-                    transformToXml(message.content(), CharsetHelper.extractCharset(ctx.response().headers()))
-                        .map(message::content)
-                        .doOnSuccess(xmlBuffer -> applyHeaders(message.headers(), message.content()))
+            .onMessage(message -> transformMessageToXml(ctx, message, ctx.response().headers(), HttpStatusCode.INTERNAL_SERVER_ERROR_500));
+    }
+
+    private Maybe<Message> transformMessageToXml(
+        final MessageExecutionContext ctx,
+        final Message message,
+        final HttpHeaders httpHeaders,
+        final int failureHttpCode
+    ) {
+        return transformToXml(message.content(), CharsetHelper.extractCharset(httpHeaders))
+            .map(message::content)
+            .doOnSuccess(xmlMessage -> setContentHeaders(message.headers(), xmlMessage.content()))
+            .onErrorResumeNext(
+                ctx.interruptMessageWith(
+                    new ExecutionFailure(failureHttpCode)
+                        .key(INVALID_MESSAGE_PAYLOAD_FAILURE_KEY)
+                        .message("Unable to transform invalid JSON message to XML")
+                )
             );
     }
 
@@ -110,14 +131,5 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         } catch (Exception ex) {
             return Maybe.error(new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex));
         }
-    }
-
-    private static void applyHeaders(HttpHeaders headers, Buffer xmlBuffer) {
-        headers.set(HttpHeaderNames.CONTENT_TYPE, CONTENT_TYPE);
-        headers.set(HttpHeaderNames.CONTENT_LENGTH, Integer.toString(xmlBuffer.length()));
-    }
-
-    private static Completable interruptWithBadRequest(HttpExecutionContext ctx, Throwable throwable) {
-        return ctx.interruptWith(new ExecutionFailure(HttpStatusCode.BAD_REQUEST_400).message(throwable.getMessage()));
     }
 }

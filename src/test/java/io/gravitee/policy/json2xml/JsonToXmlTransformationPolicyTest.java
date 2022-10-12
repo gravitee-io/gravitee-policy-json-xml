@@ -15,21 +15,29 @@
  */
 package io.gravitee.policy.json2xml;
 
+import static io.gravitee.common.http.HttpStatusCode.BAD_REQUEST_400;
+import static io.gravitee.common.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
 import static io.gravitee.policy.v3.json2xml.JsonToXmlTransformationPolicyV3.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.gateway.api.http.HttpHeaders;
-import io.gravitee.gateway.api.stream.exception.TransformationException;
+import io.gravitee.gateway.jupiter.api.ExecutionFailure;
 import io.gravitee.gateway.jupiter.api.context.ExecutionContext;
 import io.gravitee.gateway.jupiter.api.context.Request;
 import io.gravitee.gateway.jupiter.api.context.Response;
 import io.gravitee.gateway.jupiter.api.message.DefaultMessage;
 import io.gravitee.gateway.jupiter.api.message.Message;
+import io.gravitee.gateway.jupiter.core.context.interruption.InterruptionFailureException;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.MaybeTransformer;
 import io.reactivex.observers.TestObserver;
@@ -75,18 +83,24 @@ class JsonToXmlTransformationPolicyTest {
     private ArgumentCaptor<Function<Message, Maybe<Message>>> onMessageCaptor;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         cut = new JsonToXmlTransformationPolicy(configuration);
         lenient().when(ctx.request()).thenReturn(request);
         lenient().when(ctx.response()).thenReturn(response);
 
         lenient().when(request.headers()).thenReturn(HttpHeaders.create());
         lenient().when(response.headers()).thenReturn(HttpHeaders.create());
+        lenient()
+            .when(ctx.interruptBodyWith(any(ExecutionFailure.class)))
+            .thenAnswer(invocation -> Maybe.error(new InterruptionFailureException(invocation.getArgument(0))));
+        lenient()
+            .when(ctx.interruptMessageWith(any(ExecutionFailure.class)))
+            .thenAnswer(invocation -> Maybe.error(new InterruptionFailureException(invocation.getArgument(0))));
     }
 
     @Test
     @DisplayName("Should transform and add header OnRequest")
-    public void shouldTransformAndAddHeadersOnRequest() throws Exception {
+    void shouldTransformAndAddHeadersOnRequest() throws Exception {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
         final HttpHeaders headers = HttpHeaders.create();
@@ -106,7 +120,7 @@ class JsonToXmlTransformationPolicyTest {
 
     @Test
     @DisplayName("Should do nothing when no body OnRequest")
-    public void shouldDoNothingWhenNoBodyOnRequest() {
+    void shouldDoNothingWhenNoBodyOnRequest() {
         when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
 
         final TestObserver<Void> obs = cut.onRequest(ctx).test();
@@ -115,26 +129,37 @@ class JsonToXmlTransformationPolicyTest {
         final TestObserver<Buffer> bodyObs = ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.empty())).test();
 
         bodyObs.assertNoValues();
-        verify(request, never()).headers();
     }
 
     @Test
-    @DisplayName("Should interrupt with failure when bad json OnRequest")
-    public void shouldInterruptWhenBadJsonOnRequest() {
+    @DisplayName("Should interrupt with failure when invalid json OnRequest")
+    void shouldInterruptWhenInvalidJsonOnRequest() throws IOException {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
         when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
         when(request.headers()).thenReturn(HttpHeaders.create());
 
         final TestObserver<Void> obs = cut.onRequest(ctx).test();
         obs.assertNoValues();
 
-        final TestObserver<Buffer> bodyObs = ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer("Bad Json")))).test();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                    assertThat(executionFailure.message()).isNotNull();
 
-        bodyObs.assertError(TransformationException.class);
+                    return true;
+                }
+            );
     }
 
     @Test
     @DisplayName("Should transform and add header OnResponse")
-    public void shouldTransformAndAddHeadersOnResponse() throws Exception {
+    void shouldTransformAndAddHeadersOnResponse() throws Exception {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
         final HttpHeaders headers = HttpHeaders.create();
@@ -154,7 +179,7 @@ class JsonToXmlTransformationPolicyTest {
 
     @Test
     @DisplayName("Should do nothing when no body OnResponse")
-    public void shouldDoNothingWhenNoBodyOnResponse() throws Exception {
+    void shouldDoNothingWhenNoBodyOnResponse() {
         when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
 
         final TestObserver<Void> obs = cut.onResponse(ctx).test();
@@ -163,26 +188,37 @@ class JsonToXmlTransformationPolicyTest {
         final TestObserver<Buffer> bodyObs = ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.empty())).test();
 
         bodyObs.assertNoValues();
-        verify(response, never()).headers();
     }
 
     @Test
-    @DisplayName("Should interrupt with failure when bad json OnResponse")
-    public void shouldInterruptWhenBadJsonOnResponse() {
+    @DisplayName("Should interrupt with failure when invalid json OnResponse")
+    void shouldInterruptWhenInvalidJsonOnResponse() throws IOException {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
         when(response.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
         when(response.headers()).thenReturn(HttpHeaders.create());
 
         final TestObserver<Void> obs = cut.onResponse(ctx).test();
         obs.assertNoValues();
 
-        final TestObserver<Buffer> bodyObs = ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer("Bad Json")))).test();
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                    assertThat(executionFailure.message()).isNotNull();
 
-        bodyObs.assertError(TransformationException.class);
+                    return true;
+                }
+            );
     }
 
     @Test
     @DisplayName("Should transform OnMessageRequest")
-    public void shouldTransformOnMessageRequest() throws Exception {
+    void shouldTransformOnMessageRequest() throws Exception {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
 
@@ -205,8 +241,38 @@ class JsonToXmlTransformationPolicyTest {
     }
 
     @Test
+    @DisplayName("Should raise an ExecutionFailure on OnMessageRequest with wrong json content")
+    void shouldRaiseExceptionOnMessageRequestWithWrongContent() throws Exception {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
+
+        when(request.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        when(request.headers()).thenReturn(HttpHeaders.create());
+
+        final TestObserver<Void> obs = cut.onMessageRequest(ctx).test();
+        obs.assertNoValues();
+
+        onMessageCaptor
+            .getValue()
+            .apply(new DefaultMessage(invalidInput))
+            .test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                    assertThat(executionFailure.message()).isNotNull();
+
+                    return true;
+                }
+            );
+    }
+
+    @Test
     @DisplayName("Should transform OnMessageResponse")
-    public void shouldTransformOnMessageResponse() throws Exception {
+    void shouldTransformOnMessageResponse() throws Exception {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
 
@@ -226,6 +292,36 @@ class JsonToXmlTransformationPolicyTest {
                 return true;
             }
         );
+    }
+
+    @Test
+    @DisplayName("Should raise an ExecutionFailure on OnMessageResponse with wrong json content")
+    void shouldRaiseExceptionOnMessageResponseWithWrongContent() throws Exception {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
+
+        when(response.onMessage(onMessageCaptor.capture())).thenReturn(Completable.complete());
+        when(response.headers()).thenReturn(HttpHeaders.create());
+
+        final TestObserver<Void> obs = cut.onMessageResponse(ctx).test();
+        obs.assertNoValues();
+
+        onMessageCaptor
+            .getValue()
+            .apply(new DefaultMessage(invalidInput))
+            .test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                    assertThat(executionFailure.message()).isNotNull();
+
+                    return true;
+                }
+            );
     }
 
     private void verifyHeaders(HttpHeaders headers) {

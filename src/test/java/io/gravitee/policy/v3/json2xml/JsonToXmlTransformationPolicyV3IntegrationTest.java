@@ -15,10 +15,19 @@
  */
 package io.gravitee.policy.v3.json2xml;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.gravitee.apim.gateway.tests.sdk.annotations.DeployApi;
 import io.gravitee.apim.gateway.tests.sdk.configuration.GatewayConfigurationBuilder;
 import io.gravitee.definition.model.Api;
 import io.gravitee.definition.model.ExecutionMode;
 import io.gravitee.policy.json2xml.JsonToXmlTransformationPolicyIntegrationTest;
+import io.reactivex.observers.TestObserver;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.ext.web.client.HttpResponse;
+import io.vertx.reactivex.ext.web.client.WebClient;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
@@ -36,5 +45,23 @@ public class JsonToXmlTransformationPolicyV3IntegrationTest extends JsonToXmlTra
     public void configureApi(Api api) {
         super.configureApi(api);
         api.setExecutionMode(ExecutionMode.V3);
+    }
+
+    @Test
+    @DisplayName("Should return Bad Request when posting invalid json to gateway")
+    @DeployApi("/apis/api-pre.json")
+    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(WebClient client) {
+        final String input = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
+
+        final TestObserver<HttpResponse<Buffer>> obs = client.post("/test").rxSendBuffer(Buffer.buffer(input)).test();
+
+        awaitTerminalEvent(obs)
+            .assertValue(
+                response -> {
+                    assertThat(response.statusCode()).isEqualTo(500);
+                    return true;
+                }
+            )
+            .assertNoErrors();
     }
 }

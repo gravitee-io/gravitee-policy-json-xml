@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.2.0...1.2.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* interrupt execution chain when json transformation error occurred ([687e65d](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/687e65d262cc69f81dfdd5cae06d9c2e2b896d26))
+
 # [1.2.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.1...1.2.0) (2022-09-09)
 
 

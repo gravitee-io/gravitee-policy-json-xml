@@ -16,13 +16,13 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-json-xml</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1-apim-98-better-message-error-handling-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
     <description>Description of the JSON to XML Transformation Gravitee Policy</description>
@@ -34,8 +34,8 @@
     </parent>
 
     <properties>
-        <gravitee-bom.version>2.6</gravitee-bom.version>
-        <gravitee-gateway-api.version>1.46.1</gravitee-gateway-api.version>
+        <gravitee-bom.version>2.7</gravitee-bom.version>
+        <gravitee-gateway-api.version>1.48.0-alpha.2</gravitee-gateway-api.version>
         <gravitee-policy-api.version>1.11.0</gravitee-policy-api.version>
         <gravitee-common.version>1.27.0</gravitee-common.version>
         <json-schema-generator-maven-plugin.version>1.1.0</json-schema-generator-maven-plugin.version>

@@ -16,6 +16,8 @@
 package io.gravitee.policy.json2xml;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
@@ -26,10 +28,9 @@ import io.gravitee.apim.gateway.tests.sdk.configuration.GatewayConfigurationBuil
 import io.gravitee.definition.model.Api;
 import io.gravitee.definition.model.ExecutionMode;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
-import io.reactivex.observers.TestObserver;
-import io.vertx.reactivex.core.buffer.Buffer;
-import io.vertx.reactivex.ext.web.client.HttpResponse;
-import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.rxjava3.core.buffer.Buffer;
+import io.vertx.rxjava3.core.http.HttpClient;
+import io.vertx.rxjava3.core.http.HttpClientRequest;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -58,22 +59,24 @@ public class JsonToXmlTransformationPolicyIntegrationTest
     @Test
     @DisplayName("Should post xml to backend")
     @DeployApi("/apis/api-pre.json")
-    void shouldPostXmlContentToBackend(WebClient client) {
+    void shouldPostXmlContentToBackend(HttpClient client) throws InterruptedException {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
 
         wiremock.stubFor(post("/team").willReturn(ok()));
 
-        final TestObserver<HttpResponse<Buffer>> obs = client.post("/test").rxSendBuffer(Buffer.buffer(input)).test();
-
-        awaitTerminalEvent(obs)
-            .assertComplete()
-            .assertValue(
+        client
+            .rxRequest(POST, "/test")
+            .flatMap(request -> request.rxSend(Buffer.buffer(input)))
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(200);
-                    return true;
+                    return response.toFlowable();
                 }
             )
+            .test()
+            .await()
+            .assertComplete()
             .assertNoErrors();
 
         wiremock.verify(1, postRequestedFor(urlPathEqualTo("/team")).withRequestBody(new EqualToPattern(expected)));
@@ -82,40 +85,44 @@ public class JsonToXmlTransformationPolicyIntegrationTest
     @Test
     @DisplayName("Should return Bad Request when posting invalid json to gateway")
     @DeployApi("/apis/api-pre.json")
-    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(WebClient client) {
+    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(HttpClient client) throws InterruptedException {
         final String input = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
 
-        final TestObserver<HttpResponse<Buffer>> obs = client.post("/test").rxSendBuffer(Buffer.buffer(input)).test();
-
-        awaitTerminalEvent(obs)
-            .assertValue(
+        client
+            .rxRequest(POST, "/test")
+            .flatMap(request -> request.rxSend(Buffer.buffer(input)))
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(400);
-                    return true;
+                    return response.toFlowable();
                 }
             )
+            .test()
+            .await()
+            .assertComplete()
             .assertNoErrors();
     }
 
     @Test
     @DisplayName("Should get xml from gateway")
     @DeployApi("/apis/api-post.json")
-    void shouldGetXmlContentFromBackend(WebClient client) {
+    void shouldGetXmlContentFromBackend(HttpClient client) throws InterruptedException {
         final String expected = loadResource("/io/gravitee/policy/json2xml/expected.xml");
         final String backendResponse = loadResource("/io/gravitee/policy/json2xml/input.json");
         wiremock.stubFor(get("/team").willReturn(ok(backendResponse)));
 
-        final TestObserver<HttpResponse<Buffer>> obs = client.get("/test").rxSend().test();
-
-        awaitTerminalEvent(obs)
-            .assertComplete()
-            .assertValue(
+        client
+            .rxRequest(GET, "/test")
+            .flatMap(HttpClientRequest::rxSend)
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(200);
-                    assertThat(response.bodyAsString()).isEqualTo(expected);
-                    return true;
+                    return response.toFlowable();
                 }
             )
+            .test()
+            .await()
+            .assertComplete()
             .assertNoErrors();
 
         wiremock.verify(1, getRequestedFor(urlPathEqualTo("/team")));
@@ -124,20 +131,22 @@ public class JsonToXmlTransformationPolicyIntegrationTest
     @Test
     @DisplayName("Should return Internal Error when getting invalid json from backend")
     @DeployApi("/apis/api-post.json")
-    void shouldReturnInternalErrorWhenGettingInvalidXmlContentFromBackend(WebClient client) {
+    void shouldReturnInternalErrorWhenGettingInvalidXmlContentFromBackend(HttpClient client) throws InterruptedException {
         final String backendResponse = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
         wiremock.stubFor(get("/team").willReturn(ok(backendResponse)));
 
-        final TestObserver<HttpResponse<Buffer>> obs = client.get("/test").rxSend().test();
-
-        awaitTerminalEvent(obs)
-            .assertComplete()
-            .assertValue(
+        client
+            .rxRequest(GET, "/test")
+            .flatMap(HttpClientRequest::rxSend)
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(500);
-                    return true;
+                    return response.toFlowable();
                 }
             )
+            .test()
+            .await()
+            .assertComplete()
             .assertNoErrors();
 
         wiremock.verify(1, getRequestedFor(urlPathEqualTo("/team")));

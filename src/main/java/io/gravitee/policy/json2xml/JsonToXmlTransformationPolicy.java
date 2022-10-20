@@ -30,8 +30,8 @@ import io.gravitee.policy.json2xml.transformer.JSONObject;
 import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
 import io.gravitee.policy.v3.json2xml.JsonToXmlTransformationPolicyV3;
-import io.reactivex.Completable;
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -79,7 +79,7 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         return bodyUpstream
             .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(httpHeaders)))
             .doOnSuccess(xmlBuffer -> setContentHeaders(httpHeaders, xmlBuffer))
-            .onErrorResumeNext(
+            .onErrorResumeWith(
                 ctx.interruptBodyWith(
                     new ExecutionFailure(failureHttpCode)
                         .key(INVALID_PAYLOAD_FAILURE_KEY)
@@ -111,7 +111,7 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         return transformToXml(message.content(), CharsetHelper.extractCharset(httpHeaders))
             .map(message::content)
             .doOnSuccess(xmlMessage -> setContentHeaders(message.headers(), xmlMessage.content()))
-            .onErrorResumeNext(
+            .onErrorResumeWith(
                 ctx.interruptMessageWith(
                     new ExecutionFailure(failureHttpCode)
                         .key(INVALID_MESSAGE_PAYLOAD_FAILURE_KEY)

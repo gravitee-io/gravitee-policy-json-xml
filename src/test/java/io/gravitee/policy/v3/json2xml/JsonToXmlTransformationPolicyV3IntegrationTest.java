@@ -15,6 +15,7 @@
  */
 package io.gravitee.policy.v3.json2xml;
 
+import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.gravitee.apim.gateway.tests.sdk.annotations.DeployApi;
@@ -22,10 +23,8 @@ import io.gravitee.apim.gateway.tests.sdk.configuration.GatewayConfigurationBuil
 import io.gravitee.definition.model.Api;
 import io.gravitee.definition.model.ExecutionMode;
 import io.gravitee.policy.json2xml.JsonToXmlTransformationPolicyIntegrationTest;
-import io.reactivex.observers.TestObserver;
-import io.vertx.reactivex.core.buffer.Buffer;
-import io.vertx.reactivex.ext.web.client.HttpResponse;
-import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.rxjava3.core.buffer.Buffer;
+import io.vertx.rxjava3.core.http.HttpClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,18 +49,21 @@ public class JsonToXmlTransformationPolicyV3IntegrationTest extends JsonToXmlTra
     @Test
     @DisplayName("Should return Bad Request when posting invalid json to gateway")
     @DeployApi("/apis/api-pre.json")
-    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(WebClient client) {
+    void shouldReturnBadRequestWhenPostingInvalidJsonToGateway(HttpClient client) throws InterruptedException {
         final String input = loadResource("/io/gravitee/policy/json2xml/invalid-input.json");
 
-        final TestObserver<HttpResponse<Buffer>> obs = client.post("/test").rxSendBuffer(Buffer.buffer(input)).test();
-
-        awaitTerminalEvent(obs)
-            .assertValue(
+        client
+            .rxRequest(POST, "/test")
+            .flatMap(request -> request.rxSend(Buffer.buffer(input)))
+            .flatMapPublisher(
                 response -> {
                     assertThat(response.statusCode()).isEqualTo(500);
-                    return true;
+                    return response.toFlowable();
                 }
             )
+            .test()
+            .await()
+            .assertComplete()
             .assertNoErrors();
     }
 }

@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.0.0...2.1.0) (2023-03-17)
+
+
+### Bug Fixes
+
+* **deps:** upgrade gravitee-bom & alpha version ([b224c74](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/b224c747ec56468f0ebc4ca4e823c72b686d04bc))
+
+
+### Features
+
+* rename 'jupiter' package in 'reactive' ([9970547](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/9970547823f0f9113983023c7340af3a96f739a9))
+
 # [2.1.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.0.0...2.1.0-alpha.1) (2023-03-13)
 
 

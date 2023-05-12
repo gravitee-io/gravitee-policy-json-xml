@@ -59,7 +59,6 @@ SOFTWARE.
 public class JSONTokener {
 
     public static final int DEFAULT_MAX_DEPTH = 1000;
-    public static final String GRAVITEE_POLICY_JSON_XML_MAXDEPTH = "gravitee_policy_json_xml_maxdepth";
     private long character;
     private boolean eof;
     private long index;
@@ -77,7 +76,7 @@ public class JSONTokener {
      *
      * @param reader     A reader.
      */
-    public JSONTokener(Reader reader) {
+    public JSONTokener(Reader reader, int maxDepth) {
         this.reader = reader.markSupported() ? reader : new BufferedReader(reader);
         this.eof = false;
         this.usePrevious = false;
@@ -85,15 +84,15 @@ public class JSONTokener {
         this.index = 0;
         this.character = 1;
         this.line = 1;
-        this.maxDepth = ofNullable(getenv(GRAVITEE_POLICY_JSON_XML_MAXDEPTH)).map(Integer::parseInt).orElse(DEFAULT_MAX_DEPTH);
+        this.maxDepth = maxDepth;
     }
 
     /**
      * Construct a JSONTokener from an InputStream.
      * @param inputStream The source.
      */
-    public JSONTokener(InputStream inputStream) throws JSONException {
-        this(new InputStreamReader(inputStream));
+    public JSONTokener(InputStream inputStream, int maxDepth) throws JSONException {
+        this(new InputStreamReader(inputStream), maxDepth);
     }
 
     /**
@@ -101,8 +100,8 @@ public class JSONTokener {
      *
      * @param s     A source string.
      */
-    public JSONTokener(String s) {
-        this(new StringReader(s));
+    public JSONTokener(String s, int maxDepth) {
+        this(new StringReader(s), maxDepth);
     }
 
     /**

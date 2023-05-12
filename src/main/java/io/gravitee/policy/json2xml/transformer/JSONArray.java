@@ -159,7 +159,7 @@ public class JSONArray implements Iterable<Object> {
      *             If there is a syntax error.
      */
     public JSONArray(String source) throws JSONException {
-        this(new JSONTokener(source));
+        this(new JSONTokener(source, JSONTokener.DEFAULT_MAX_DEPTH));
     }
 
     /**

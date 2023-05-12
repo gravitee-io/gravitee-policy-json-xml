@@ -17,10 +17,12 @@ package io.gravitee.policy.json2xml;
 
 import static io.gravitee.common.http.HttpStatusCode.BAD_REQUEST_400;
 import static io.gravitee.common.http.HttpStatusCode.INTERNAL_SERVER_ERROR_500;
+import static io.gravitee.policy.json2xml.transformer.JSONTokener.DEFAULT_MAX_DEPTH;
 import static io.gravitee.policy.v3.json2xml.JsonToXmlTransformationPolicyV3.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.gravitee.gateway.api.buffer.Buffer;
@@ -33,6 +35,7 @@ import io.gravitee.gateway.reactive.api.context.Response;
 import io.gravitee.gateway.reactive.api.message.DefaultMessage;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.gateway.reactive.core.context.interruption.InterruptionFailureException;
+import io.gravitee.node.api.configuration.Configuration;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -73,6 +76,9 @@ class JsonToXmlTransformationPolicyTest {
     @Mock
     private Response response;
 
+    @Mock
+    private Configuration mockConfiguration;
+
     @Captor
     private ArgumentCaptor<MaybeTransformer<Buffer, Buffer>> onBodyCaptor;
 
@@ -84,6 +90,10 @@ class JsonToXmlTransformationPolicyTest {
         cut = new JsonToXmlTransformationPolicy(configuration);
         lenient().when(ctx.request()).thenReturn(request);
         lenient().when(ctx.response()).thenReturn(response);
+        lenient()
+            .when(mockConfiguration.getProperty(JsonToXmlTransformationPolicy.POLICY_JSON_XML_MAXDEPTH, Integer.class, DEFAULT_MAX_DEPTH))
+            .thenReturn(DEFAULT_MAX_DEPTH);
+        lenient().when(ctx.getComponent(Configuration.class)).thenReturn(mockConfiguration);
 
         lenient().when(request.headers()).thenReturn(HttpHeaders.create());
         lenient().when(response.headers()).thenReturn(HttpHeaders.create());

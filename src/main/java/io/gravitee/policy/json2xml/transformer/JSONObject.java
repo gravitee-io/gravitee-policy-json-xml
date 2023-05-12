@@ -208,6 +208,7 @@ public class JSONObject {
                 case 0:
                     throw x.syntaxError("A JSONObject text must end with '}'");
                 case '}':
+                    x.decrementObjectDepth();
                     return;
                 default:
                     x.back();
@@ -233,6 +234,7 @@ public class JSONObject {
                     x.back();
                     break;
                 case '}':
+                    x.decrementObjectDepth();
                     return;
                 default:
                     throw x.syntaxError("Expected a ',' or '}'");

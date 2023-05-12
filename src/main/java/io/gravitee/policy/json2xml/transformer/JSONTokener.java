@@ -15,7 +15,15 @@
  */
 package io.gravitee.policy.json2xml.transformer;
 
-import java.io.*;
+import static java.lang.System.getenv;
+import static java.util.Optional.ofNullable;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 
 /*
 Copyright (c) 2002 JSON.org
@@ -50,6 +58,8 @@ SOFTWARE.
  */
 public class JSONTokener {
 
+    public static final int DEFAULT_MAX_DEPTH = 1000;
+    public static final String GRAVITEE_POLICY_JSON_XML_MAXDEPTH = "gravitee_policy_json_xml_maxdepth";
     private long character;
     private boolean eof;
     private long index;
@@ -57,6 +67,10 @@ public class JSONTokener {
     private char previous;
     private Reader reader;
     private boolean usePrevious;
+
+    private int objectDepth = 0;
+    private int arrayDepth = 0;
+    private final int maxDepth;
 
     /**
      * Construct a JSONTokener from a Reader.
@@ -71,6 +85,7 @@ public class JSONTokener {
         this.index = 0;
         this.character = 1;
         this.line = 1;
+        this.maxDepth = ofNullable(getenv(GRAVITEE_POLICY_JSON_XML_MAXDEPTH)).map(Integer::parseInt).orElse(DEFAULT_MAX_DEPTH);
     }
 
     /**
@@ -336,6 +351,14 @@ public class JSONTokener {
         }
     }
 
+    public final void decrementObjectDepth() {
+        this.objectDepth--;
+    }
+
+    public final void decrementArrayDepth() {
+        this.arrayDepth--;
+    }
+
     /**
      * Get the next value. The value can be a Boolean, Double, Integer,
      * JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
@@ -353,9 +376,11 @@ public class JSONTokener {
                 return this.nextString(c);
             case '{':
                 this.back();
+                checkMaxDepth(this.objectDepth++);
                 return new JSONObject(this);
             case '[':
                 this.back();
+                checkMaxDepth(this.arrayDepth++);
                 return new JSONArray(this);
         }
 
@@ -380,6 +405,12 @@ public class JSONTokener {
             throw this.syntaxError("Missing value");
         }
         return JSONObject.stringToValue(string);
+    }
+
+    private void checkMaxDepth(int depth) {
+        if (depth > this.maxDepth && this.maxDepth > -1) {
+            throw new IllegalArgumentException("Too many nested objects or arrays");
+        }
     }
 
     /**

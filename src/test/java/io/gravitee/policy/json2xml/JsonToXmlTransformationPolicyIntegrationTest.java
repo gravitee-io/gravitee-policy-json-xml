@@ -68,12 +68,10 @@ public class JsonToXmlTransformationPolicyIntegrationTest
         client
             .rxRequest(POST, "/test")
             .flatMap(request -> request.rxSend(Buffer.buffer(input)))
-            .flatMapPublisher(
-                response -> {
-                    assertThat(response.statusCode()).isEqualTo(200);
-                    return response.toFlowable();
-                }
-            )
+            .flatMapPublisher(response -> {
+                assertThat(response.statusCode()).isEqualTo(200);
+                return response.toFlowable();
+            })
             .test()
             .await()
             .assertComplete()
@@ -91,12 +89,10 @@ public class JsonToXmlTransformationPolicyIntegrationTest
         client
             .rxRequest(POST, "/test")
             .flatMap(request -> request.rxSend(Buffer.buffer(input)))
-            .flatMapPublisher(
-                response -> {
-                    assertThat(response.statusCode()).isEqualTo(400);
-                    return response.toFlowable();
-                }
-            )
+            .flatMapPublisher(response -> {
+                assertThat(response.statusCode()).isEqualTo(400);
+                return response.toFlowable();
+            })
             .test()
             .await()
             .assertComplete()
@@ -114,12 +110,10 @@ public class JsonToXmlTransformationPolicyIntegrationTest
         client
             .rxRequest(GET, "/test")
             .flatMap(HttpClientRequest::rxSend)
-            .flatMapPublisher(
-                response -> {
-                    assertThat(response.statusCode()).isEqualTo(200);
-                    return response.toFlowable();
-                }
-            )
+            .flatMapPublisher(response -> {
+                assertThat(response.statusCode()).isEqualTo(200);
+                return response.toFlowable();
+            })
             .test()
             .await()
             .assertComplete()
@@ -138,12 +132,10 @@ public class JsonToXmlTransformationPolicyIntegrationTest
         client
             .rxRequest(GET, "/test")
             .flatMap(HttpClientRequest::rxSend)
-            .flatMapPublisher(
-                response -> {
-                    assertThat(response.statusCode()).isEqualTo(500);
-                    return response.toFlowable();
-                }
-            )
+            .flatMapPublisher(response -> {
+                assertThat(response.statusCode()).isEqualTo(500);
+                return response.toFlowable();
+            })
             .test()
             .await()
             .assertComplete()

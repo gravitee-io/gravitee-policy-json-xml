@@ -55,12 +55,10 @@ public class JsonToXmlTransformationPolicyV3IntegrationTest extends JsonToXmlTra
         client
             .rxRequest(POST, "/test")
             .flatMap(request -> request.rxSend(Buffer.buffer(input)))
-            .flatMapPublisher(
-                response -> {
-                    assertThat(response.statusCode()).isEqualTo(500);
-                    return response.toFlowable();
-                }
-            )
+            .flatMapPublisher(response -> {
+                assertThat(response.statusCode()).isEqualTo(500);
+                return response.toFlowable();
+            })
             .test()
             .await()
             .assertComplete()

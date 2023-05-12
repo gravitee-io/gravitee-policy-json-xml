@@ -149,19 +149,17 @@ class JsonToXmlTransformationPolicyTest {
         obs.assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     @Test
@@ -175,19 +173,17 @@ class JsonToXmlTransformationPolicyTest {
         obs.assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     @Test
@@ -201,19 +197,17 @@ class JsonToXmlTransformationPolicyTest {
         obs.assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     @Test
@@ -260,19 +254,17 @@ class JsonToXmlTransformationPolicyTest {
         obs.assertNoValues();
 
         ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     @Test
@@ -290,13 +282,11 @@ class JsonToXmlTransformationPolicyTest {
 
         final TestObserver<Message> bodyObs = onMessageCaptor.getValue().apply(new DefaultMessage(input)).test();
 
-        bodyObs.assertValue(
-            message -> {
-                assertThat(expected.equals(message.content().toString())).isTrue();
-                verifyHeaders(message.headers());
-                return true;
-            }
-        );
+        bodyObs.assertValue(message -> {
+            assertThat(expected.equals(message.content().toString())).isTrue();
+            verifyHeaders(message.headers());
+            return true;
+        });
     }
 
     @Test
@@ -314,19 +304,17 @@ class JsonToXmlTransformationPolicyTest {
             .getValue()
             .apply(new DefaultMessage(invalidInput))
             .test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     @Test
@@ -344,13 +332,11 @@ class JsonToXmlTransformationPolicyTest {
 
         final TestObserver<Message> bodyObs = onMessageCaptor.getValue().apply(new DefaultMessage(input)).test();
 
-        bodyObs.assertValue(
-            message -> {
-                assertThat(expected.equals(message.content().toString())).isTrue();
-                verifyHeaders(message.headers());
-                return true;
-            }
-        );
+        bodyObs.assertValue(message -> {
+            assertThat(expected.equals(message.content().toString())).isTrue();
+            verifyHeaders(message.headers());
+            return true;
+        });
     }
 
     @Test
@@ -368,19 +354,17 @@ class JsonToXmlTransformationPolicyTest {
             .getValue()
             .apply(new DefaultMessage(invalidInput))
             .test()
-            .assertError(
-                throwable -> {
-                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
-                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
-                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
-                    assertThat(executionFailure).isNotNull();
-                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
-                    assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
-                    assertThat(executionFailure.message()).isNotNull();
+            .assertError(throwable -> {
+                assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                assertThat(executionFailure).isNotNull();
+                assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_MESSAGE_PAYLOAD");
+                assertThat(executionFailure.statusCode()).isEqualTo(INTERNAL_SERVER_ERROR_500);
+                assertThat(executionFailure.message()).isNotNull();
 
-                    return true;
-                }
-            );
+                return true;
+            });
     }
 
     private void verifyHeaders(HttpHeaders headers) {

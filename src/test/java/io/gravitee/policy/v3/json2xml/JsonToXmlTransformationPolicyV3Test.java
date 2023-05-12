@@ -91,11 +91,9 @@ class JsonToXmlTransformationPolicyV3Test {
 
         final ReadWriteStream result = cut.onRequestContent(request, policyChain, executionContext);
         assertThat(result).isNotNull();
-        result.bodyHandler(
-            resultBody -> {
-                assertResultingJsonObjectsAreEquals(expected, resultBody);
-            }
-        );
+        result.bodyHandler(resultBody -> {
+            assertResultingJsonObjectsAreEquals(expected, resultBody);
+        });
 
         result.write(Buffer.buffer(input));
         result.end();
@@ -142,11 +140,9 @@ class JsonToXmlTransformationPolicyV3Test {
 
         final ReadWriteStream result = cut.onResponseContent(response, policyChain, executionContext);
         assertThat(result).isNotNull();
-        result.bodyHandler(
-            resultBody -> {
-                assertResultingJsonObjectsAreEquals(expected, resultBody);
-            }
-        );
+        result.bodyHandler(resultBody -> {
+            assertResultingJsonObjectsAreEquals(expected, resultBody);
+        });
 
         result.write(Buffer.buffer(input));
         result.end();

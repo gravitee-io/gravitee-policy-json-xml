@@ -65,3 +65,7 @@ You can configure the policy with the following options:
 | The transformation cannot be executed properly
 
 |===
+
+=== Nested objects
+
+To limit the processing time in case of nested object, a default max depth of nested object has been defined to 1000. This default value can be overriden using the environment variable `gravitee_policy_json_xml_maxdepth`.

@@ -22,7 +22,7 @@
 
     <groupId>io.gravitee.policy</groupId>
     <artifactId>gravitee-policy-json-xml</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
     <description>Description of the JSON to XML Transformation  Gravitee Policy</description>

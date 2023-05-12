@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.1...1.1.2) (2023-05-12)
+
+
+### Bug Fixes
+
+* check depth of embedded object and array ([75287f5](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/75287f5217d5d7e1b54d690474475e5e8a8eff4e))
+
 ## [1.1.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.0...1.1.1) (2022-04-28)
 
 

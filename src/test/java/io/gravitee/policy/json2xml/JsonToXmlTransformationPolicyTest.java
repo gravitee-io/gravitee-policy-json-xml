@@ -155,6 +155,58 @@ class JsonToXmlTransformationPolicyTest {
     }
 
     @Test
+    @DisplayName("Should interrupt with failure when max nested object reach OnRequest")
+    void shouldInterruptWhenMaxNestedObjectOnRequest() throws IOException {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-embedded-object.json");
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        when(request.headers()).thenReturn(HttpHeaders.create());
+
+        final TestObserver<Void> obs = cut.onRequest(ctx).test();
+        obs.assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                    assertThat(executionFailure.message()).isNotNull();
+
+                    return true;
+                }
+            );
+    }
+
+    @Test
+    @DisplayName("Should interrupt with failure when max nested array reach OnRequest")
+    void shouldInterruptWhenMaxNestedArrayOnRequest() throws IOException {
+        final String invalidInput = loadResource("/io/gravitee/policy/json2xml/invalid-embedded-array.json");
+        when(request.onBody(onBodyCaptor.capture())).thenReturn(Completable.complete());
+        when(request.headers()).thenReturn(HttpHeaders.create());
+
+        final TestObserver<Void> obs = cut.onRequest(ctx).test();
+        obs.assertNoValues();
+
+        ((Maybe<Buffer>) onBodyCaptor.getValue().apply(Maybe.just(Buffer.buffer(invalidInput)))).test()
+            .assertError(
+                throwable -> {
+                    assertThat(throwable).isInstanceOf(InterruptionFailureException.class);
+                    InterruptionFailureException failureException = (InterruptionFailureException) throwable;
+                    ExecutionFailure executionFailure = failureException.getExecutionFailure();
+                    assertThat(executionFailure).isNotNull();
+                    assertThat(executionFailure.key()).isEqualTo("JSON_INVALID_PAYLOAD");
+                    assertThat(executionFailure.statusCode()).isEqualTo(BAD_REQUEST_400);
+                    assertThat(executionFailure.message()).isNotNull();
+
+                    return true;
+                }
+            );
+    }
+
+    @Test
     @DisplayName("Should transform and add header OnResponse")
     void shouldTransformAndAddHeadersOnResponse() throws Exception {
         final String input = loadResource("/io/gravitee/policy/json2xml/input.json");

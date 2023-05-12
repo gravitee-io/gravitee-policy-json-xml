@@ -139,6 +139,7 @@ public class JSONArray implements Iterable<Object> {
                         x.back();
                         break;
                     case ']':
+                        x.decrementArrayDepth();
                         return;
                     default:
                         throw x.syntaxError("Expected a ',' or ']'");

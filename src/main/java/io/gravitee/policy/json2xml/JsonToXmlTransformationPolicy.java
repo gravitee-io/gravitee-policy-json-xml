@@ -16,17 +16,21 @@
 package io.gravitee.policy.json2xml;
 
 import io.gravitee.common.http.HttpStatusCode;
+import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.stream.exception.TransformationException;
 import io.gravitee.gateway.reactive.api.ExecutionFailure;
+import io.gravitee.gateway.reactive.api.context.GenericExecutionContext;
 import io.gravitee.gateway.reactive.api.context.HttpExecutionContext;
 import io.gravitee.gateway.reactive.api.context.MessageExecutionContext;
 import io.gravitee.gateway.reactive.api.message.Message;
 import io.gravitee.gateway.reactive.api.policy.Policy;
+import io.gravitee.node.api.configuration.Configuration;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.gravitee.policy.json2xml.transformer.JSONObject;
+import io.gravitee.policy.json2xml.transformer.JSONTokener;
 import io.gravitee.policy.json2xml.transformer.XML;
 import io.gravitee.policy.json2xml.utils.CharsetHelper;
 import io.gravitee.policy.v3.json2xml.JsonToXmlTransformationPolicyV3;
@@ -41,6 +45,8 @@ import java.nio.charset.StandardCharsets;
  */
 public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicyV3 implements Policy {
 
+    public static final String POLICY_JSON_XML_MAXDEPTH = "policy.json-xml.maxdepth";
+    public static final String ENVVAR_POLICY_JSON_XML_MAXDEPTH = "gravitee_policy_jsonxml_maxdepth";
     private static final String INVALID_PAYLOAD_FAILURE_KEY = "JSON_INVALID_PAYLOAD";
     private static final String INVALID_MESSAGE_PAYLOAD_FAILURE_KEY = "JSON_INVALID_MESSAGE_PAYLOAD";
 
@@ -77,7 +83,7 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         final int failureHttpCode
     ) {
         return bodyUpstream
-            .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(httpHeaders)))
+            .flatMap(buffer -> transformToXml(buffer, CharsetHelper.extractCharset(httpHeaders), getMaxDepth(ctx)))
             .doOnSuccess(xmlBuffer -> setContentHeaders(httpHeaders, xmlBuffer))
             .onErrorResumeWith(
                 ctx.interruptBodyWith(
@@ -108,7 +114,11 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         final HttpHeaders httpHeaders,
         final int failureHttpCode
     ) {
-        return transformToXml(message.content(), CharsetHelper.extractCharset(httpHeaders))
+        return transformToXml(
+            message.content(),
+            CharsetHelper.extractCharset(httpHeaders),
+            ctx.getComponent(Configuration.class).getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH)
+        )
             .map(message::content)
             .doOnSuccess(xmlMessage -> setContentHeaders(message.headers(), xmlMessage.content()))
             .onErrorResumeWith(
@@ -120,10 +130,10 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
             );
     }
 
-    private Maybe<Buffer> transformToXml(Buffer buffer, final Charset charset) {
+    private Maybe<Buffer> transformToXml(Buffer buffer, final Charset charset, int maxDepth) {
         try {
             String encodedPayload = new String(buffer.toString(charset).getBytes(StandardCharsets.UTF_8));
-            JSONObject jsonPayload = new JSONObject(encodedPayload);
+            JSONObject jsonPayload = new JSONObject(encodedPayload, maxDepth);
             JSONObject jsonPayloadWithRoot = new JSONObject();
             jsonPayloadWithRoot.append(configuration.getRootElement(), jsonPayload);
 
@@ -131,5 +141,13 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
         } catch (Exception ex) {
             return Maybe.error(new TransformationException("Unable to transform JSON into XML: " + ex.getMessage(), ex));
         }
+    }
+
+    protected int getMaxDepth(GenericExecutionContext ctx) {
+        if (this.maxDepth == null) {
+            this.maxDepth =
+                ctx.getComponent(Configuration.class).getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH);
+        }
+        return this.maxDepth;
     }
 }

@@ -96,7 +96,7 @@ public class Cookie {
         String name;
         JSONObject jo = new JSONObject();
         Object value;
-        JSONTokener x = new JSONTokener(string);
+        JSONTokener x = new JSONTokener(string, JSONTokener.DEFAULT_MAX_DEPTH);
         jo.put("name", x.nextTo('='));
         x.next('=');
         jo.put("value", x.nextTo(';'));

@@ -121,6 +121,54 @@ class JsonToXmlTransformationPolicyTest {
     }
 
     @Test
+    @DisplayName("Should throw TransformationException if maxDepth reach for object")
+    public void shouldLimitObjectDepthOnRequestContent() throws Exception {
+        String input = loadResource("/io/gravitee/policy/json2xml/invalid-embedded-object.json");
+
+        // Prepare context
+        when(configuration.getScope()).thenReturn(PolicyScope.REQUEST);
+        when(request.headers()).thenReturn(HttpHeaders.create());
+        when(request.metrics()).thenReturn(Metrics.on(Instant.now().toEpochMilli()).build());
+
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        assertThat(result).isNotNull();
+
+        result.write(Buffer.buffer(input));
+        result.end();
+
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.CONTENT_TYPE);
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.TRANSFER_ENCODING);
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.CONTENT_LENGTH);
+        assertThat(request.metrics().getMessage()).contains("Unable to transform JSON into XML:");
+        assertThat(request.metrics().getMessage()).contains("Too many nested objects or arrays");
+        verify(policyChain, times(1)).streamFailWith(any());
+    }
+
+    @Test
+    @DisplayName("Should throw TransformationException if maxDepth reach for array")
+    public void shouldLimitArrayDepthOnRequestContent() throws Exception {
+        String input = loadResource("/io/gravitee/policy/json2xml/invalid-embedded-array.json");
+
+        // Prepare context
+        when(configuration.getScope()).thenReturn(PolicyScope.REQUEST);
+        when(request.headers()).thenReturn(HttpHeaders.create());
+        when(request.metrics()).thenReturn(Metrics.on(Instant.now().toEpochMilli()).build());
+
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        assertThat(result).isNotNull();
+
+        result.write(Buffer.buffer(input));
+        result.end();
+
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.CONTENT_TYPE);
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.TRANSFER_ENCODING);
+        assertThat(request.headers().names()).doesNotContain(HttpHeaderNames.CONTENT_LENGTH);
+        assertThat(request.metrics().getMessage()).contains("Unable to transform JSON into XML:");
+        assertThat(request.metrics().getMessage()).contains("Too many nested objects or arrays");
+        verify(policyChain, times(1)).streamFailWith(any());
+    }
+
+    @Test
     @DisplayName("Should transform and add header OnResponseContent")
     public void shouldTransformAndAddHeadersOnResponseContent() throws Exception {
         String input = loadResource("/io/gravitee/policy/json2xml/input.json");

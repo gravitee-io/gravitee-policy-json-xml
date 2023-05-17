@@ -52,7 +52,7 @@ public class HTTPTokener extends JSONTokener {
      * @param string A source string.
      */
     public HTTPTokener(String string) {
-        super(string);
+        super(string, DEFAULT_MAX_DEPTH);
     }
 
     /**

@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.2...1.1.3) (2023-05-17)
+
+
+### Bug Fixes
+
+* use ExecutionContext instead of System.getEnv ([9286cd3](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/9286cd36549e3a6a720ca29ed7dd03c87a1f8b64))
+
 ## [1.1.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/1.1.1...1.1.2) (2023-05-12)
 
 

@@ -17,19 +17,23 @@ package io.gravitee.policy.json2xml;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.gravitee.gateway.api.ExecutionContext;
 import io.gravitee.gateway.api.Request;
 import io.gravitee.gateway.api.Response;
 import io.gravitee.gateway.api.buffer.Buffer;
 import io.gravitee.gateway.api.http.HttpHeaderNames;
 import io.gravitee.gateway.api.http.HttpHeaders;
 import io.gravitee.gateway.api.stream.ReadWriteStream;
+import io.gravitee.node.api.configuration.Configuration;
 import io.gravitee.policy.api.PolicyChain;
 import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.gravitee.policy.json2xml.configuration.PolicyScope;
+import io.gravitee.policy.json2xml.transformer.JSONTokener;
 import io.gravitee.reporter.api.http.Metrics;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,9 +68,17 @@ class JsonToXmlTransformationPolicyTest {
     @Spy
     private Response response;
 
+    @Mock
+    private ExecutionContext executionContext;
+
     @BeforeEach
     public void setUp() {
         cut = new JsonToXmlTransformationPolicy(configuration);
+        cut = new JsonToXmlTransformationPolicy(configuration);
+        final Configuration config = mock(Configuration.class);
+        when(config.getProperty(JsonToXmlTransformationPolicy.POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH))
+            .thenReturn(100);
+        when(executionContext.getComponent(Configuration.class)).thenReturn(config);
     }
 
     @Test
@@ -80,13 +92,11 @@ class JsonToXmlTransformationPolicyTest {
         when(configuration.getRootElement()).thenReturn("root");
         when(request.headers()).thenReturn(HttpHeaders.create());
 
-        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain, executionContext);
         assertThat(result).isNotNull();
-        result.bodyHandler(
-            resultBody -> {
-                assertResultingJsonObjectsAreEquals(expected, resultBody);
-            }
-        );
+        result.bodyHandler(resultBody -> {
+            assertResultingJsonObjectsAreEquals(expected, resultBody);
+        });
 
         result.write(Buffer.buffer(input));
         result.end();
@@ -107,7 +117,7 @@ class JsonToXmlTransformationPolicyTest {
         when(request.headers()).thenReturn(HttpHeaders.create());
         when(request.metrics()).thenReturn(Metrics.on(Instant.now().toEpochMilli()).build());
 
-        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain, executionContext);
         assertThat(result).isNotNull();
 
         result.write(Buffer.buffer(input));
@@ -130,7 +140,7 @@ class JsonToXmlTransformationPolicyTest {
         when(request.headers()).thenReturn(HttpHeaders.create());
         when(request.metrics()).thenReturn(Metrics.on(Instant.now().toEpochMilli()).build());
 
-        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain, executionContext);
         assertThat(result).isNotNull();
 
         result.write(Buffer.buffer(input));
@@ -154,7 +164,7 @@ class JsonToXmlTransformationPolicyTest {
         when(request.headers()).thenReturn(HttpHeaders.create());
         when(request.metrics()).thenReturn(Metrics.on(Instant.now().toEpochMilli()).build());
 
-        final ReadWriteStream result = cut.onRequestContent(request, policyChain);
+        final ReadWriteStream result = cut.onRequestContent(request, policyChain, executionContext);
         assertThat(result).isNotNull();
 
         result.write(Buffer.buffer(input));
@@ -179,13 +189,11 @@ class JsonToXmlTransformationPolicyTest {
         when(configuration.getRootElement()).thenReturn("root");
         when(response.headers()).thenReturn(HttpHeaders.create());
 
-        final ReadWriteStream result = cut.onResponseContent(response, policyChain);
+        final ReadWriteStream result = cut.onResponseContent(response, policyChain, executionContext);
         assertThat(result).isNotNull();
-        result.bodyHandler(
-            resultBody -> {
-                assertResultingJsonObjectsAreEquals(expected, resultBody);
-            }
-        );
+        result.bodyHandler(resultBody -> {
+            assertResultingJsonObjectsAreEquals(expected, resultBody);
+        });
 
         result.write(Buffer.buffer(input));
         result.end();
@@ -205,7 +213,7 @@ class JsonToXmlTransformationPolicyTest {
         when(configuration.getScope()).thenReturn(PolicyScope.RESPONSE);
         when(response.headers()).thenReturn(HttpHeaders.create());
 
-        final ReadWriteStream result = cut.onResponseContent(response, policyChain);
+        final ReadWriteStream result = cut.onResponseContent(response, policyChain, executionContext);
         assertThat(result).isNotNull();
 
         result.write(Buffer.buffer(input));

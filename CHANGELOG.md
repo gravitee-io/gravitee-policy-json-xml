@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.1...2.1.2) (2023-05-17)
+
+
+### Bug Fixes
+
+* use gravitee config to access mas nested object limit configuraion ([0b8e0f0](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/0b8e0f00b3931b61d9d5b9fc9bafcad0a530bc1d))
+
 ## [2.1.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.0...2.1.1) (2023-05-12)
 
 

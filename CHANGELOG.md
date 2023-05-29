@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.2...2.1.3) (2023-05-29)
+
+
+### Bug Fixes
+
+* rename execution phase properties in manifest ([6334d3a](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/6334d3afe04eade270125117e638153c76e9ff93))
+
 ## [2.1.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.1...2.1.2) (2023-05-17)
 
 

@@ -1,3 +1,10 @@
+## [2.1.4](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.3...2.1.4) (2023-05-30)
+
+
+### Bug Fixes
+
+* bump `json` to `20230227` ([8e51fc8](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/8e51fc8bd69916ad5dd375b0f50a87fdfe649ad8))
+
 ## [2.1.3](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.2...2.1.3) (2023-05-29)
 
 

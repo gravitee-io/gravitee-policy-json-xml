@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.gravitee.policy</groupId>
+    <groupId>com.graviteesource.policy</groupId>
     <artifactId>gravitee-policy-json-xml</artifactId>
     <version>2.1.4</version>
     <packaging>jar</packaging>
@@ -213,6 +213,20 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.11</version>
+                <configuration>
+                    <properties>
+                        <owner>The Gravitee team</owner>
+                        <email>http://gravitee.io</email>
+                    </properties>
+                    <excludes>
+                        <exclude>**/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.hubspot.maven.plugins</groupId>

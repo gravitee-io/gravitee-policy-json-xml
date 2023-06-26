@@ -1,23 +1,22 @@
 {
-  "type" : "object",
-  "id" : "urn:jsonschema:io:gravitee:policy:json2xml:configuration:JsonToXMLTransformationPolicyConfiguration",
-  "properties" : {
-    "scope" : {
-      "title": "Scope",
-      "description": "Execute policy on <strong>request</strong> or <strong>response</strong> phase.",
-      "type" : "string",
-      "default": "REQUEST",
-      "enum" : [ "REQUEST", "RESPONSE" ]
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+    "properties": {
+        "scope": {
+            "title": "Scope",
+            "description": "Select phase to execute the policy.",
+            "type": "string",
+            "default": "REQUEST",
+            "enum": ["REQUEST", "RESPONSE"]
+        },
+        "rootElement": {
+            "title": "Root element",
+            "description": "Root element name that's enclose content.",
+            "type": "string",
+            "default": "root",
+            "pattern": "^[a-z:_A-Z]+[a-zA-Z0-9:-_]*"
+        }
     },
-    "rootElement" : {
-      "title": "Root element",
-      "description": "Root element name that's enclose content",
-      "type" : "string",
-      "default": "root",
-      "pattern": "^[a-z:_A-Z]+[a-zA-Z0-9:-_]*"
-    }
-  },
-  "required": [
-    "rootElement"
-  ]
+    "required": ["rootElement"]
 }

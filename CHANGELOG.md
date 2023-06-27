@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.4...2.2.0) (2023-06-27)
+
+
+### Features
+
+* clean json-schema ([5112d78](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/5112d7815afa089f12ba07d0d58c761318403e42))
+
 ## [2.1.4](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.3...2.1.4) (2023-05-30)
 
 

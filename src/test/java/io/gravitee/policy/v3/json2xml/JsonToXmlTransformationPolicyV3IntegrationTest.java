@@ -15,14 +15,16 @@
  */
 package io.gravitee.policy.v3.json2xml;
 
+import static io.gravitee.definition.model.ExecutionMode.V3;
 import static io.vertx.core.http.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.gravitee.apim.gateway.tests.sdk.AbstractPolicyTest;
 import io.gravitee.apim.gateway.tests.sdk.annotations.DeployApi;
-import io.gravitee.apim.gateway.tests.sdk.configuration.GatewayConfigurationBuilder;
-import io.gravitee.definition.model.Api;
-import io.gravitee.definition.model.ExecutionMode;
-import io.gravitee.policy.json2xml.JsonToXmlTransformationPolicyIntegrationTest;
+import io.gravitee.apim.gateway.tests.sdk.annotations.GatewayTest;
+import io.gravitee.policy.json2xml.JsonToXmlTransformationPolicy;
+import io.gravitee.policy.json2xml.JsonToXmlTransformationPolicyV4EmulationEngineIntegrationTest;
+import io.gravitee.policy.json2xml.configuration.JsonToXmlTransformationPolicyConfiguration;
 import io.vertx.rxjava3.core.buffer.Buffer;
 import io.vertx.rxjava3.core.http.HttpClient;
 import org.junit.jupiter.api.DisplayName;
@@ -32,19 +34,8 @@ import org.junit.jupiter.api.Test;
  * @author Jeoffrey HAEYAERT (jeoffrey.haeyaert at graviteesource.com)
  * @author GraviteeSource Team
  */
-public class JsonToXmlTransformationPolicyV3IntegrationTest extends JsonToXmlTransformationPolicyIntegrationTest {
-
-    @Override
-    protected void configureGateway(GatewayConfigurationBuilder gatewayConfigurationBuilder) {
-        super.configureGateway(gatewayConfigurationBuilder);
-        gatewayConfigurationBuilder.set("api.jupiterMode.enabled", "false");
-    }
-
-    @Override
-    public void configureApi(Api api) {
-        super.configureApi(api);
-        api.setExecutionMode(ExecutionMode.V3);
-    }
+@GatewayTest(v2ExecutionMode = V3)
+public class JsonToXmlTransformationPolicyV3IntegrationTest extends JsonToXmlTransformationPolicyV4EmulationEngineIntegrationTest {
 
     @Test
     @DisplayName("Should return Bad Request when posting invalid json to gateway")

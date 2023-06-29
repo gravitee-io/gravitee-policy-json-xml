@@ -1,3 +1,15 @@
+# [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.2.0...3.0.0-alpha.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* bump dependencies versions ([b19b834](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/b19b834e1affa9720c0aed2d90aaae316ea3798f))
+
+
+### BREAKING CHANGES
+
+* use apim version 4
+
 # [2.2.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.1.4...2.2.0) (2023-06-27)
 
 

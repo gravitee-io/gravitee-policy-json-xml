@@ -1,3 +1,21 @@
+# [3.0.0](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.2.0...3.0.0) (2023-07-18)
+
+
+### Bug Fixes
+
+* bump dependencies versions ([b19b834](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/b19b834e1affa9720c0aed2d90aaae316ea3798f))
+
+
+### chore
+
+* **deps:** update gravitee-parent ([30e96ce](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/30e96ce39b513d2235ef847b88b203dfff278565))
+
+
+### BREAKING CHANGES
+
+* **deps:** require Java17
+* use apim version 4
+
 # [3.0.0-alpha.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/2.2.0...3.0.0-alpha.1) (2023-06-29)
 
 

@@ -25,7 +25,7 @@
     <version>3.0.0</version>
     <packaging>jar</packaging>
     <name>Gravitee.io APIM - Policy - JSON to XML Transformation</name>
-    <description>Description of the JSON to XML Transformation Gravitee Policy</description>
+    <description>Transform JSON content to XML content</description>
 
     <parent>
         <groupId>io.gravitee</groupId>

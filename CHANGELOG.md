@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/3.0.1...3.0.2) (2023-07-26)
+
+
+### Bug Fixes
+
+* decrease the nested object limit to 100 instead of 1000 ([573864b](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/573864b2288d5be975bef86f3852fc6fc87b071e))
+
 ## [3.0.1](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/3.0.0...3.0.1) (2023-07-20)
 
 

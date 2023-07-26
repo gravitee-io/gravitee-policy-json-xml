@@ -58,7 +58,7 @@ SOFTWARE.
  */
 public class JSONTokener {
 
-    public static final int DEFAULT_MAX_DEPTH = 1000;
+    public static final int DEFAULT_MAX_DEPTH = 100;
     private long character;
     private boolean eof;
     private long index;

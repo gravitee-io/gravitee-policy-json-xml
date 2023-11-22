@@ -1,3 +1,10 @@
+## [3.0.3](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/3.0.2...3.0.3) (2023-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.json:json to v20231013 ([d9c6f88](https://github.com/gravitee-io/gravitee-policy-json-xml/commit/d9c6f88283afc7600d79c88cad1f4837a4654245))
+
 ## [3.0.2](https://github.com/gravitee-io/gravitee-policy-json-xml/compare/3.0.1...3.0.2) (2023-07-26)
 
 

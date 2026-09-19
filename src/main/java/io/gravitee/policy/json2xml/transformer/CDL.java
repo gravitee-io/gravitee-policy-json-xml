@@ -164,13 +164,11 @@ public class CDL {
                 String string = object.toString();
                 if (
                     string.length() > 0 &&
-                    (
-                        string.indexOf(',') >= 0 ||
+                    (string.indexOf(',') >= 0 ||
                         string.indexOf('\n') >= 0 ||
                         string.indexOf('\r') >= 0 ||
                         string.indexOf(0) >= 0 ||
-                        string.charAt(0) == '"'
-                    )
+                        string.charAt(0) == '"')
                 ) {
                     sb.append('"');
                     int length = string.length();

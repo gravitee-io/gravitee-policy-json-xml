@@ -277,10 +277,10 @@ public class JSONArray implements Iterable<Object> {
             // method and place any thrown exception in the JSONException
             throw new JSONException(
                 "JSONObject[" +
-                JSONObject.quote(Integer.toString(index)) +
-                "] is not an enum of type " +
-                JSONObject.quote(clazz.getSimpleName()) +
-                "."
+                    JSONObject.quote(Integer.toString(index)) +
+                    "] is not an enum of type " +
+                    JSONObject.quote(clazz.getSimpleName()) +
+                    "."
             );
         }
         return val;

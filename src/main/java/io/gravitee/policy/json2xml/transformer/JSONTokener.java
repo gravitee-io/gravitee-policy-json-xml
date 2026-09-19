@@ -173,7 +173,8 @@ public class JSONTokener {
                 throw new JSONException(exception);
             }
 
-            if (c <= 0) { // End of stream
+            if (c <= 0) {
+                // End of stream
                 this.eof = true;
                 c = 0;
             }

@@ -145,8 +145,9 @@ public class JsonToXmlTransformationPolicy extends JsonToXmlTransformationPolicy
 
     protected int getMaxDepth(GenericExecutionContext ctx) {
         if (this.maxDepth == null) {
-            this.maxDepth =
-                ctx.getComponent(Configuration.class).getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH);
+            this.maxDepth = ctx
+                .getComponent(Configuration.class)
+                .getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH);
         }
         return this.maxDepth;
     }

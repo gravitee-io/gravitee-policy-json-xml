@@ -128,7 +128,8 @@ public class XML {
      * @throws JSONException
      */
     public static void noSpace(String string) throws JSONException {
-        int i, length = string.length();
+        int i,
+            length = string.length();
         if (length == 0) {
             throw new JSONException("Empty string.");
         }
@@ -227,7 +228,6 @@ public class XML {
         } else if (token instanceof Character) {
             throw x.syntaxError("Misshaped tag");
             // Open tag <
-
         } else {
             tagName = (String) token;
             token = null;
@@ -402,7 +402,6 @@ public class XML {
                         sb.append(escape(value.toString()));
                     }
                     // Emit an array of similar keys
-
                 } else if (value instanceof JSONArray) {
                     ja = (JSONArray) value;
                     for (Object val : ja) {
@@ -423,7 +422,6 @@ public class XML {
                     sb.append(key);
                     sb.append("/>");
                     // Emit a new tag <k>
-
                 } else {
                     sb.append(toString(value, key));
                 }
@@ -457,6 +455,8 @@ public class XML {
         string = (object == null) ? "null" : escape(object.toString());
         return (tagName == null)
             ? "\"" + string + "\""
-            : (string.length() == 0) ? "<" + tagName + "/>" : "<" + tagName + ">" + string + "</" + tagName + ">";
+            : (string.length() == 0)
+                ? "<" + tagName + "/>"
+                : "<" + tagName + ">" + string + "</" + tagName + ">";
     }
 }

@@ -65,8 +65,7 @@ public class JsonToXmlTransformationPolicyV3 {
     public ReadWriteStream onResponseContent(Response response, PolicyChain chain, ExecutionContext ctx) {
         if (configuration.getScope() == null || configuration.getScope() == PolicyScope.RESPONSE) {
             Charset charset = CharsetHelper.extractCharset(response.headers());
-            return TransformableResponseStreamBuilder
-                .on(response)
+            return TransformableResponseStreamBuilder.on(response)
                 .chain(chain)
                 .contentType(CONTENT_TYPE)
                 .transform(map(charset, ctx))
@@ -79,8 +78,7 @@ public class JsonToXmlTransformationPolicyV3 {
     public ReadWriteStream onRequestContent(Request request, PolicyChain chain, ExecutionContext ctx) {
         if (configuration.getScope() == PolicyScope.REQUEST) {
             Charset charset = CharsetHelper.extractCharset(request.headers());
-            return TransformableRequestStreamBuilder
-                .on(request)
+            return TransformableRequestStreamBuilder.on(request)
                 .chain(chain)
                 .contentType(CONTENT_TYPE)
                 .transform(map(charset, ctx))
@@ -105,8 +103,9 @@ public class JsonToXmlTransformationPolicyV3 {
 
     protected int getMaxDepth(ExecutionContext ctx) {
         if (this.maxDepth == null) {
-            this.maxDepth =
-                ctx.getComponent(Configuration.class).getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH);
+            this.maxDepth = ctx
+                .getComponent(Configuration.class)
+                .getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH);
         }
         return this.maxDepth;
     }

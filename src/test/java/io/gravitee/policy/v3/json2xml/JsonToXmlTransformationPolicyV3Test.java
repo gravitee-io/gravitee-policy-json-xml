@@ -73,8 +73,9 @@ class JsonToXmlTransformationPolicyV3Test {
     public void init() {
         cut = new JsonToXmlTransformationPolicyV3(configuration);
         final Configuration config = mock(Configuration.class);
-        when(config.getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH))
-            .thenReturn(JSONTokener.DEFAULT_MAX_DEPTH);
+        when(config.getProperty(POLICY_JSON_XML_MAXDEPTH, Integer.class, JSONTokener.DEFAULT_MAX_DEPTH)).thenReturn(
+            JSONTokener.DEFAULT_MAX_DEPTH
+        );
         when(executionContext.getComponent(Configuration.class)).thenReturn(config);
     }
 

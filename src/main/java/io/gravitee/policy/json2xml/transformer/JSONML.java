@@ -135,7 +135,6 @@ public class JSONML {
                         throw x.syntaxError("Misshaped tag");
                     }
                     // Open tag <
-
                 } else {
                     if (!(token instanceof String)) {
                         throw x.syntaxError("Bad tagName '" + token + "'.");
@@ -202,7 +201,6 @@ public class JSONML {
                             }
                         }
                         // Content, between <...> and </...>
-
                     } else {
                         if (token != XML.GT) {
                             throw x.syntaxError("Misshaped tag");

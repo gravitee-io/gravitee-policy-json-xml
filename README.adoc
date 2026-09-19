@@ -38,13 +38,14 @@ endif::[]
 
 |===
 
-== Compatibility with APIM
+== Compatibility matrix
 
 |===
-| Plugin version | APIM version
-| 1.x            | 3.x
-| 3.x            | 4.x to latest
+| Plugin version | APIM            | Java version
 
+| 4.x            | 4.7.x to latest | 21
+| 3.x            | 4.x to latest   | 17
+| 1.x            | 3.x             | 11
 |===
 
 == Description
